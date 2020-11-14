@@ -53,10 +53,13 @@ def counted(f):
 
 class ComponentCreation(tk.Frame):
     @counted
-    def __init__(self, top, mid1, mid2, mid3, bottom, name_var_list, i):
+    def __init__(self, top, mid1, mid2, mid3, bottom, name_var_list, metric_var_list, quantity_var_list, i):
         #frame = frame that is connected to the notebook heading related.
         #num = number of components they want to enter.
         count = self.__init__.calls
+        self.name_var_list = name_var_list
+        self.metric_var_list = metric_var_list
+        self.quantity_var_list = quantity_var_list
 
         top_children = len(top.winfo_children())
         mid1_children = len(mid1.winfo_children())
@@ -103,21 +106,21 @@ class ComponentCreation(tk.Frame):
             name_entry = ttk.Entry(name_frame, textvariable=self.name_var, validate="key", validatecommand=(name_reg, '%P'))
             name_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)
 
-            #Component Power(kW) (must be real)
-            power_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')
-            power_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)
+            #Component Metric
+            metric_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')
+            metric_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)
 
-            power_lbl = tk.Label(power_frame, relief=tk.FLAT, bd=0, bg='gray15')
-            power_lbl.config(bd=0, text='Power(kW): ', font='System 6', fg=fg)
-            power_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)
+            metric_lbl = tk.Label(metric_frame, relief=tk.FLAT, bd=0, bg='gray15')
+            metric_lbl.config(bd=0, text='Power (kW):', font='System 6', fg=fg)
+            metric_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)
 
-            power_reg = frame.register(self.power_validate)
+            metric_reg = frame.register(self.metric_validate)
 
-            self.power_var = tk.DoubleVar()
-            self.power_var.set('0.0')
+            self.metric_var = tk.DoubleVar()
+            self.metric_var.set('0.0')
 
-            power_entry = ttk.Entry(power_frame, textvariable=self.power_var, validate="key", validatecommand=(power_reg, '%P'))
-            power_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)
+            metric_entry = ttk.Entry(metric_frame, textvariable=self.metric_var, validate="key", validatecommand=(metric_reg, '%P'))
+            metric_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)
 
             #Component Quantity
             quantity_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')
@@ -135,16 +138,23 @@ class ComponentCreation(tk.Frame):
             quantity_entry = ttk.Entry(quantity_frame, textvariable=self.quantity_var, validate="key", validatecommand=(quantity_reg, '%P'))
             quantity_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)
 
-            remove_btn = tk.Button(self, text='Remove', command=self.destroy)
+            remove_btn = tk.Button(self, text='Remove', command=self._destroy)
             remove_btn.pack(pady=5)
 
             #Append vars into a list
-            name_var_list.append(self.name_var)
+            self.name_var_list.append(self.name_var)
+            self.metric_var_list.append(self.metric_var)
+            self.quantity_var_list.append(self.quantity_var)
+
 
         elif children_total == 30:
             ms.showerror('Error','You cannot create more than 30 components', icon='error')
 
-        
+    def _destroy(self):
+        self.name_var_list.pop(-1)
+        self.metric_var_list.pop(-1)
+        self.quantity_var_list.pop(-1)
+        self.destroy()
 
     def name_validate(self, name_inp):
         if name_inp is "":
@@ -154,13 +164,13 @@ class ComponentCreation(tk.Frame):
         else:
             return True 
 
-    def power_validate(self, power_inp):
-        if power_inp is "":
+    def metric_validate(self, metric_inp):
+        if metric_inp is "":
             return True
-        elif power_inp is None:
+        elif metric_inp is None:
             return False
         else:
-            return True 
+            return True
 
     def quantity_validate(self, quantity_inp):
         if quantity_inp.isdigit():
@@ -224,15 +234,36 @@ class Turbines():
         info_comp_btn = ttk.Button(comp_frame, text='Confirm Information', command=self.info_press)
         info_comp_btn.pack(side=tk.TOP, anchor=tk.E)
 
-        #Name var list
+        
         self.name_var_list = []
+        self.power_var_list = []
+        self.quantity_var_list = []
 
     def num_press(self):
         self.i+=1
-        self.c = ComponentCreation(self.top_frame, self.mid1_frame, self.mid2_frame, self.mid3_frame, self.bottom_frame, self.name_var_list, self.i)
+        self.c = ComponentCreation(self.top_frame, self.mid1_frame, self.mid2_frame, self.mid3_frame, self.bottom_frame, self.name_var_list, self.power_var_list, self.quantity_var_list, self.i)
 
     def info_press(self):
-        print(self.c.name_var_list)
+        already_called = 0
+        for i in range(len(self.name_var_list)):
+            self.name_var_list[i].get()
+            if self.name_var_list[i].get() == '':
+                ms.showerror('Error', 'You left one or more Name Fields empty.', icon='error')
+                already_called += 1
+                if already_called == 1:
+                    break
+            try:
+                self.power_var_list[i].get()
+                if self.power_var_list[i].get() == '':
+                    ms.showerror('Error', 'You left a Power Field empty.', icon='error')
+            except Exception:
+                ms.showerror('Error', 'Please enter a valid number in the Power Field.', icon='error')
+            try:
+                self.quantity_var_list[i].get()
+            except Exception:
+                ms.showerror('Error', 'You left a Quantity Field empty.', icon='error')
+
+
 
 class HeatExchangers():
     def __init__(self, master, main_notebook):
@@ -257,14 +288,128 @@ class HeatExchangers():
 class Pumps():
     def __init__(self, master, main_notebook):
         self.master = master
-        pumps_page = tk.Frame(main_notebook, bg=bg)
-        main_notebook.add(pumps_page, text='Pumps')
+        self.pumps_page = tk.Frame(main_notebook, bg=bg)
+        main_notebook.add(self.pumps_page, text='Pumps')
+
+        self.i=0
+
+        #Frame Rows
+        self.top_frame = tk.Frame(self.pumps_page, bg='gray25')
+        self.top_frame.pack(expand=True, fill=tk.BOTH)
+
+        self.mid1_frame = tk.Frame(self.pumps_page, bg='gray23')
+        self.mid1_frame.pack(expand=True, fill=tk.BOTH)
+
+        self.mid2_frame = tk.Frame(self.pumps_page, bg='gray21')
+        self.mid2_frame.pack(expand=True, fill=tk.BOTH)
+
+        self.mid3_frame = tk.Frame(self.pumps_page, bg='gray19')
+        self.mid3_frame.pack(expand=True, fill=tk.BOTH)
+
+        self.bottom_frame = tk.Frame(self.pumps_page, bg='gray17')
+        self.bottom_frame.pack(expand=True, fill=tk.BOTH)
+
+        #Entry field to enter how many turbines you want.
+        comp_frame = tk.Frame(self.pumps_page, relief=tk.FLAT, bd=0, bg='gray15')
+        comp_frame.pack(side=tk.BOTTOM, anchor=tk.S, expand=True, pady=5, padx=5)
+
+        num_btn_frame = tk.Frame(comp_frame, relief=tk.FLAT, bd=0, bg='gray15')
+        num_btn_frame.pack(side=tk.TOP, anchor=tk.N)
+
+        num_comp_btn = ttk.Button(comp_frame, text='Add Component', command=self.num_press)
+        num_comp_btn.pack()
+
+        #Retrieve Information
+        info_btn_frame = tk.Frame(comp_frame, relief=tk.FLAT, bd=0, bg='gray15')
+        info_btn_frame.pack(side=tk.TOP, anchor=tk.N)
+
+        info_comp_btn = ttk.Button(comp_frame, text='Confirm Information', command=self.info_press)
+        info_comp_btn.pack(side=tk.TOP, anchor=tk.E)
+
+        #Name var list
+        self.name_var_list = []
+        self.power_var_list = []
+        self.quantity_var_list = []
+
+    def num_press(self):
+        self.i+=1
+        self.c = ComponentCreation(self.top_frame, self.mid1_frame, self.mid2_frame, self.mid3_frame, self.bottom_frame, self.name_var_list, self.power_var_list, self.quantity_var_list, self.i)
+
+    def info_press(self):
+        print(self.name_var_list)
+        for i in range(len(self.name_var_list)):
+            comp_name = self.name_var_list[i].get()
+            try:
+                comp_metric = self.power_var_list[i].get()
+            except Exception:
+                ms.showerror('Error', 'Please enter a valid number in the Power Field.')
+            try:
+                comp_quantity = self.quantity_var_list[i].get()
+            except Exception:
+                comp_quantity = 1
 
 class Expanders():
     def __init__(self, master, main_notebook):
         self.master = master
-        expanders_page = tk.Frame(main_notebook, bg=bg)
-        main_notebook.add(expanders_page, text='Expanders')
+        self.expanders_page = tk.Frame(main_notebook, bg=bg)
+        main_notebook.add(self.expanders_page, text='Expanders')
+
+        self.i=0
+
+        #Frame Rows
+        self.top_frame = tk.Frame(self.expanders_page, bg='gray25')
+        self.top_frame.pack(expand=True, fill=tk.BOTH)
+
+        self.mid1_frame = tk.Frame(self.expanders_page, bg='gray23')
+        self.mid1_frame.pack(expand=True, fill=tk.BOTH)
+
+        self.mid2_frame = tk.Frame(self.expanders_page, bg='gray21')
+        self.mid2_frame.pack(expand=True, fill=tk.BOTH)
+
+        self.mid3_frame = tk.Frame(self.expanders_page, bg='gray19')
+        self.mid3_frame.pack(expand=True, fill=tk.BOTH)
+
+        self.bottom_frame = tk.Frame(self.expanders_page, bg='gray17')
+        self.bottom_frame.pack(expand=True, fill=tk.BOTH)
+
+        #Entry field to enter how many turbines you want.
+        comp_frame = tk.Frame(self.expanders_page, relief=tk.FLAT, bd=0, bg='gray15')
+        comp_frame.pack(side=tk.BOTTOM, anchor=tk.S, expand=True, pady=5, padx=5)
+
+        num_btn_frame = tk.Frame(comp_frame, relief=tk.FLAT, bd=0, bg='gray15')
+        num_btn_frame.pack(side=tk.TOP, anchor=tk.N)
+
+        num_comp_btn = ttk.Button(comp_frame, text='Add Component', command=self.num_press)
+        num_comp_btn.pack()
+
+        #Retrieve Information
+        info_btn_frame = tk.Frame(comp_frame, relief=tk.FLAT, bd=0, bg='gray15')
+        info_btn_frame.pack(side=tk.TOP, anchor=tk.N)
+
+        info_comp_btn = ttk.Button(comp_frame, text='Confirm Information', command=self.info_press)
+        info_comp_btn.pack(side=tk.TOP, anchor=tk.E)
+
+        #Name var list
+        self.name_var_list = []
+        self.power_var_list = []
+        self.quantity_var_list = []
+
+    def num_press(self):
+        self.i+=1
+        self.c = ComponentCreation(self.top_frame, self.mid1_frame, self.mid2_frame, self.mid3_frame, self.bottom_frame, self.name_var_list, self.power_var_list, self.quantity_var_list, self.i)
+
+    def info_press(self):
+        print(self.name_var_list)
+        for i in range(len(self.name_var_list)):
+            comp_name = self.name_var_list[i].get()
+            try:
+                comp_metric = self.power_var_list[i].get()
+            except Exception:
+                ms.showerror('Error', 'Please enter a valid number in the Power Field.')
+            try:
+                comp_quantity = self.quantity_var_list[i].get()
+            except Exception:
+                comp_quantity = 1
 
 class StorageTanks():
     def __init__(self, master, main_notebook):

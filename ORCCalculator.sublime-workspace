@@ -4,6 +4,14 @@
 		"selected_items":
 		[
 			[
+				"mid2",
+				"mid2\tFrame ⟠"
+			],
+			[
+				"mid1",
+				"mid1\tFrame ⟠"
+			],
+			[
 				"today",
 				"today_formatted"
 			],
@@ -236,11 +244,19 @@
 	"buffers":
 	[
 		{
-			"file": "ORCCalculator.py",
+			"file": "main.py",
 			"settings":
 			{
-				"buffer_size": 231571,
+				"buffer_size": 10391,
 				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "if count <= 6:\n            tk.Frame.__init__(self, top, bg='gray20')\n            self.pack(side=tk.LEFT, padx=5, pady=5)\n\n            comp_canvas = tk.Canvas(self, width=200, height=200, relief=tk.RIDGE, bd=1, bg='gray15')\n            comp_canvas.pack(side=tk.TOP, anchor=tk.NW, padx=30, pady=15)\n\n            title_lbl = tk.Label(comp_canvas, text='Component Information %d' % count, fg=fg, bg='gray25')\n            title_lbl.pack()\n\n            #Component Name\n            name_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            name_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            name_lbl = tk.Label(name_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            name_lbl.config(bd=0, text='Name: ', font='System 6', fg=fg)\n            name_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            name_reg = top.register(self.name_validate)\n\n            self.name_var = tk.StringVar()\n            self.name_var.set('')\n\n            name_entry = ttk.Entry(name_frame, textvariable=self.name_var, validate=\"key\", validatecommand=(name_reg, '%P'))\n            name_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            #Component Power(kW) (must be real)\n            power_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            power_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            power_lbl = tk.Label(power_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            power_lbl.config(bd=0, text='Power(kW): ', font='System 6', fg=fg)\n            power_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            power_reg = top.register(self.power_validate)\n\n            self.power_var = tk.DoubleVar()\n            self.power_var.set('0.0')\n\n            power_entry = ttk.Entry(power_frame, textvariable=self.power_var, validate=\"key\", validatecommand=(power_reg, '%P'))\n            power_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            #Component Quantity\n            quantity_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            quantity_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            quantity_lbl = tk.Label(quantity_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            quantity_lbl.config(bd=0, text='Quantity: ', font='System 6', fg=fg)\n            quantity_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            quantity_reg = top.register(self.quantity_validate)\n\n            self.quantity_var = tk.IntVar()\n            self.quantity_var.set('1')\n\n            quantity_entry = ttk.Entry(quantity_frame, textvariable=self.quantity_var, validate=\"key\", validatecommand=(quantity_reg, '%P'))\n            quantity_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            remove_btn = tk.Button(self, text='Remove', command=self.destroy)\n            remove_btn.pack(pady=5)\n\n        elif count > 6 and count <=12:\n            tk.Frame.__init__(self, mid1, bg='gray20')\n            self.pack(side=tk.LEFT, padx=5, pady=5)\n\n            comp_canvas = tk.Canvas(self, width=200, height=200, relief=tk.RIDGE, bd=1, bg='gray15')\n            comp_canvas.pack(side=tk.TOP, anchor=tk.NW, padx=30, pady=15)\n\n            title_lbl = tk.Label(comp_canvas, text='Component Information %d' % count, fg=fg, bg='gray25')\n            title_lbl.pack()\n\n            #Component Name\n            name_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            name_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            name_lbl = tk.Label(name_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            name_lbl.config(bd=0, text='Name: ', font='System 6', fg=fg)\n            name_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            name_reg = mid1.register(self.name_validate)\n\n            self.name_var = tk.StringVar()\n            self.name_var.set('')\n\n            name_entry = ttk.Entry(name_frame, textvariable=self.name_var, validate=\"key\", validatecommand=(name_reg, '%P'))\n            name_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            #Component Power(kW) (must be real)\n            power_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            power_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            power_lbl = tk.Label(power_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            power_lbl.config(bd=0, text='Power(kW): ', font='System 6', fg=fg)\n            power_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            power_reg = mid1.register(self.power_validate)\n\n            self.power_var = tk.DoubleVar()\n            self.power_var.set('0.0')\n\n            power_entry = ttk.Entry(power_frame, textvariable=self.power_var, validate=\"key\", validatecommand=(power_reg, '%P'))\n            power_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            #Component Quantity\n            quantity_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            quantity_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            quantity_lbl = tk.Label(quantity_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            quantity_lbl.config(bd=0, text='Quantity: ', font='System 6', fg=fg)\n            quantity_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            quantity_reg = mid1.register(self.quantity_validate)\n\n            self.quantity_var = tk.IntVar()\n            self.quantity_var.set('1')\n\n            quantity_entry = ttk.Entry(quantity_frame, textvariable=self.quantity_var, validate=\"key\", validatecommand=(quantity_reg, '%P'))\n            quantity_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            remove_btn = tk.Button(self, text='Remove', command=self.destroy)\n            remove_btn.pack(pady=5)\n\n        elif count > 12 and count <=18:\n            tk.Frame.__init__(self, mid2, bg='gray20')\n            self.pack(side=tk.LEFT, padx=5, pady=5)\n\n            comp_canvas = tk.Canvas(self, width=200, height=200, relief=tk.RIDGE, bd=1, bg='gray15')\n            comp_canvas.pack(side=tk.TOP, anchor=tk.NW, padx=30, pady=15)\n\n            title_lbl = tk.Label(comp_canvas, text='Component Information %d' % count, fg=fg, bg='gray25')\n            title_lbl.pack()\n\n            #Component Name\n            name_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            name_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            name_lbl = tk.Label(name_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            name_lbl.config(bd=0, text='Name: ', font='System 6', fg=fg)\n            name_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            name_reg = mid2.register(self.name_validate)\n\n            self.name_var = tk.StringVar()\n            self.name_var.set('')\n\n            name_entry = ttk.Entry(name_frame, textvariable=self.name_var, validate=\"key\", validatecommand=(name_reg, '%P'))\n            name_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            #Component Power(kW) (must be real)\n            power_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            power_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            power_lbl = tk.Label(power_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            power_lbl.config(bd=0, text='Power(kW): ', font='System 6', fg=fg)\n            power_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            power_reg = mid2.register(self.power_validate)\n\n            self.power_var = tk.DoubleVar()\n            self.power_var.set('0.0')\n\n            power_entry = ttk.Entry(power_frame, textvariable=self.power_var, validate=\"key\", validatecommand=(power_reg, '%P'))\n            power_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            #Component Quantity\n            quantity_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            quantity_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            quantity_lbl = tk.Label(quantity_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            quantity_lbl.config(bd=0, text='Quantity: ', font='System 6', fg=fg)\n            quantity_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            quantity_reg = mid2.register(self.quantity_validate)\n\n            self.quantity_var = tk.IntVar()\n            self.quantity_var.set('1')\n\n            quantity_entry = ttk.Entry(quantity_frame, textvariable=self.quantity_var, validate=\"key\", validatecommand=(quantity_reg, '%P'))\n            quantity_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            remove_btn = tk.Button(self, text='Remove', command=self.destroy)\n            remove_btn.pack(pady=5)\n\n        elif count > 18 and count <=24:\n            tk.Frame.__init__(self, mid3, bg='gray20')\n            self.pack(side=tk.LEFT, padx=5, pady=5)\n\n            comp_canvas = tk.Canvas(self, width=200, height=200, relief=tk.RIDGE, bd=1, bg='gray15')\n            comp_canvas.pack(side=tk.TOP, anchor=tk.NW, padx=30, pady=15)\n\n            title_lbl = tk.Label(comp_canvas, text='Component Information %d' % count, fg=fg, bg='gray25')\n            title_lbl.pack()\n\n            #Component Name\n            name_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            name_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            name_lbl = tk.Label(name_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            name_lbl.config(bd=0, text='Name: ', font='System 6', fg=fg)\n            name_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            name_reg = mid3.register(self.name_validate)\n\n            self.name_var = tk.StringVar()\n            self.name_var.set('')\n\n            name_entry = ttk.Entry(name_frame, textvariable=self.name_var, validate=\"key\", validatecommand=(name_reg, '%P'))\n            name_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            #Component Power(kW) (must be real)\n            power_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            power_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            power_lbl = tk.Label(power_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            power_lbl.config(bd=0, text='Power(kW): ', font='System 6', fg=fg)\n            power_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            power_reg = mid3.register(self.power_validate)\n\n            self.power_var = tk.DoubleVar()\n            self.power_var.set('0.0')\n\n            power_entry = ttk.Entry(power_frame, textvariable=self.power_var, validate=\"key\", validatecommand=(power_reg, '%P'))\n            power_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            #Component Quantity\n            quantity_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            quantity_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            quantity_lbl = tk.Label(quantity_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            quantity_lbl.config(bd=0, text='Quantity: ', font='System 6', fg=fg)\n            quantity_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            quantity_reg = mid3.register(self.quantity_validate)\n\n            self.quantity_var = tk.IntVar()\n            self.quantity_var.set('1')\n\n            quantity_entry = ttk.Entry(quantity_frame, textvariable=self.quantity_var, validate=\"key\", validatecommand=(quantity_reg, '%P'))\n            quantity_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            remove_btn = tk.Button(self, text='Remove', command=self.destroy)\n            remove_btn.pack(pady=5)\n\n        elif count > 24 and count <=30:\n            tk.Frame.__init__(self, bottom, bg='gray20')\n            self.pack(side=tk.LEFT, padx=5, pady=5)\n\n            comp_canvas = tk.Canvas(self, width=200, height=200, relief=tk.RIDGE, bd=1, bg='gray15')\n            comp_canvas.pack(side=tk.TOP, anchor=tk.NW, padx=30, pady=15)\n\n            title_lbl = tk.Label(comp_canvas, text='Component Information %d' % count, fg=fg, bg='gray25')\n            title_lbl.pack()\n\n            #Component Name\n            name_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            name_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            name_lbl = tk.Label(name_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            name_lbl.config(bd=0, text='Name: ', font='System 6', fg=fg)\n            name_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            name_reg = bottom.register(self.name_validate)\n\n            self.name_var = tk.StringVar()\n            self.name_var.set('')\n\n            name_entry = ttk.Entry(name_frame, textvariable=self.name_var, validate=\"key\", validatecommand=(name_reg, '%P'))\n            name_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            #Component Power(kW) (must be real)\n            power_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            power_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            power_lbl = tk.Label(power_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            power_lbl.config(bd=0, text='Power(kW): ', font='System 6', fg=fg)\n            power_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            power_reg = bottom.register(self.power_validate)\n\n            self.power_var = tk.DoubleVar()\n            self.power_var.set('0.0')\n\n            power_entry = ttk.Entry(power_frame, textvariable=self.power_var, validate=\"key\", validatecommand=(power_reg, '%P'))\n            power_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            #Component Quantity\n            quantity_frame = tk.Frame(comp_canvas, relief=tk.FLAT, bd=0, bg='gray15')\n            quantity_frame.pack(side=tk.TOP, anchor=tk.N, fill=tk.X, expand=True)\n\n            quantity_lbl = tk.Label(quantity_frame, relief=tk.FLAT, bd=0, bg='gray15')\n            quantity_lbl.config(bd=0, text='Quantity: ', font='System 6', fg=fg)\n            quantity_lbl.pack(side=tk.LEFT, anchor=tk.W, padx=2, pady=2)\n\n            quantity_reg = bottom.register(self.quantity_validate)\n\n            self.quantity_var = tk.IntVar()\n            self.quantity_var.set('1')\n\n            quantity_entry = ttk.Entry(quantity_frame, textvariable=self.quantity_var, validate=\"key\", validatecommand=(quantity_reg, '%P'))\n            quantity_entry.pack(side=tk.RIGHT, anchor=tk.E, padx=2, pady=2)\n\n            remove_btn = tk.Button(self, text='Remove', command=self.destroy)\n            remove_btn.pack(pady=5)\n\n\n\n\n\nelse:\n            ms.showerror('Error','You cannot create more than 30 components', icon='error')",
+			"settings":
+			{
+				"buffer_size": 14679,
 				"line_ending": "Windows"
 			}
 		}
@@ -318,6 +334,7 @@
 	"file_history":
 	[
 		"/C/Users/marco/Desktop/Programming/Heat Exchanger Avg Cost/main revamped/ORCCalculator.py",
+		"/C/Users/marco/Desktop/Programming/Heat Exchanger Avg Cost/main revamped/ORCCalculator.sublime-workspace",
 		"/C/Users/marco/Desktop/Programming/Heat Exchanger Avg Cost/main/.git/COMMIT_EDITMSG",
 		"/C/Users/marco/Desktop/Collyer's Folder/Computer Science/Y2 Project/Library Management System/.git/COMMIT_EDITMSG",
 		"/C/Users/marco/Desktop/Collyer's Folder/Computer Science/Y2 Project/Library Management System/create_db.py",
@@ -409,9 +426,35 @@
 	},
 	"find_state":
 	{
-		"case_sensitive": false,
+		"case_sensitive": true,
 		"find_history":
 		[
+			"title_lbl",
+			"num",
+			"'gray25'",
+			"mid1_children",
+			"top_children",
+			"count",
+			"self = top",
+			"[\"master\"]",
+			"top",
+			"TOP",
+			"top",
+			"x",
+			"X",
+			"x",
+			"X",
+			"x",
+			"X",
+			"x",
+			"X",
+			"name",
+			"Name",
+			"name",
+			"Name",
+			"name",
+			"Name",
+			"name",
 			"page2"
 		],
 		"highlight": true,
@@ -435,19 +478,19 @@
 			[
 				{
 					"buffer": 0,
-					"file": "ORCCalculator.py",
+					"file": "main.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 231571,
+						"buffer_size": 10391,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								34656,
-								34656
+								7469,
+								7469
 							]
 						],
 						"settings":
@@ -457,10 +500,39 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 9209.0,
+						"translation.y": 2459.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 14679,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								14679,
+								14600
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 6,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3627.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
