@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"quantity",
+				"quantity_var\tIntVar ⟠"
+			],
+			[
 				"mid2",
 				"mid2\tFrame ⟠"
 			],
@@ -247,7 +251,7 @@
 			"file": "main.py",
 			"settings":
 			{
-				"buffer_size": 10391,
+				"buffer_size": 16463,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -429,6 +433,14 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"name",
+			"pumps_page",
+			"expanders_page",
+			"metric",
+			"turbines_page",
+			"metric_validate",
+			"ComponentCreation",
+			"power",
 			"title_lbl",
 			"num",
 			"'gray25'",
@@ -482,15 +494,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 10391,
+						"buffer_size": 16463,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								7469,
-								7469
+								8061,
+								8061
 							]
 						],
 						"settings":
@@ -500,7 +512,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2459.0,
+						"translation.y": 2903.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
