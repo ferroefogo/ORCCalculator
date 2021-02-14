@@ -106,7 +106,7 @@ class ComponentCreation(tk.Frame):
 
             quantity_reg = frame.register(self.quantity_validate)
 
-            self.quantity_var = tk.IntVar()
+            self.quantity_var = tk.StringVar()
             self.quantity_var.set('1')
 
             quantity_entry = ttk.Entry(quantity_frame, textvariable=self.quantity_var, validate="key", validatecommand=(quantity_reg, '%P'))
@@ -115,8 +115,6 @@ class ComponentCreation(tk.Frame):
             remove_btn = ttk.Label(self, text='Remove')
             remove_btn.pack(pady=5)
             remove_btn.bind("<Button-1>", self._destroy)
-
-            self.top_widgets = top.winfo_children()
 
             # Append vars into a list
             self.name_var_list.append(self.name_var)
@@ -139,7 +137,10 @@ class ComponentCreation(tk.Frame):
             try:
                 if self.name_iter_list[x] == str(event_parent_name_entry):
                     self.name_iter_list.pop(x)
+
                     self.name_var_list.pop(x)
+                    self.metric_var_list.pop(x)
+                    self.quantity_var_list.pop(x)
             except IndexError:
                 pass
         self.destroy()
@@ -157,7 +158,6 @@ class ComponentCreation(tk.Frame):
             float(metric_inp)
         except Exception:
             return False
-        return True
 
     def quantity_validate(self, quantity_inp):
         if quantity_inp.isdigit():
@@ -169,7 +169,7 @@ class ComponentCreation(tk.Frame):
         elif quantity_inp == "":
             return True
         elif quantity_inp is None:
-            return True
+            return False
         else:
             return False
 
@@ -234,45 +234,77 @@ class Turbines():
         self.c = ComponentCreation(self.top_frame, self.mid1_frame, self.mid2_frame, self.mid3_frame, self.bottom_frame, self.name_var_list, self.power_var_list, "Power (kW):", self.quantity_var_list, self.i, self.name_iter_list)
 
     def info_press(self):
-        # Remove now destroyed component fields from component value lists.
         self.total_turbine_cost = 0
         already_called = 0
-        # Calculate total cost of components within section using specialised formulae
-        for i in range(len(self.name_var_list)):
-            if self.name_var_list[i].get() == '':
-                ms.showerror('Error', 'You left one or more Name Fields empty.', icon='error')
-                already_called += 1
-                if already_called == 1:
-                    break
+        invalid_entries = []
+        _type = 'Turbine'
 
-            if self.quantity_var_list[i].get() == '':
-                ms.showerror('Error', 'You left a Quantity Field empty.', icon='error')
-            elif isinstance(self.quantity_var_list[i].get(), int) is not True:
-                ms.showerror('Error', 'Please enter a valid number in the Quantity Field.', icon='error')
-            if self.power_var_list[i].get() == '' or self.power_var_list[i].get() == 0.0:
-                ms.showerror('Error', 'You left a Power Field empty.', icon='error')
-            elif isinstance(self.power_var_list[i].get(), float) is not True:
-                ms.showerror('Error', 'Please enter a valid number in the Power Field.', icon='error')
-            else:
-                # Check if its the Turbine Page to calculate the correct results for the turbine costs.
-                if self.main_notebook.index(self.main_notebook.select()) == 1:
-                    self.turbine_cost = (2984.9 * self.power_var_list[i].get() ** 0.5171)
-                    self.turbine_quantity_cost = self.turbine_cost * self.quantity_var_list[i].get()
-                    self.total_turbine_cost += self.turbine_quantity_cost
+        if len(self.name_var_list) == 0:
+            ms.showerror('Error', 'No components entered.', icon='error')
+        else:
+            # Calculate total cost of components within section using specialised formulae
+            for i in range(len(self.name_var_list)):
+                if self.name_var_list[i].get() == '':
+                    ms.showerror('Error', 'You left one or more Name Fields empty.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
 
-                    # Find next highest id
-                    select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
-                    highest_val = [x[0] for x in select_highest_val][0]
+                try:
+                    if self.quantity_var_list[i].get() == '':
+                        ms.showerror('Error', 'You left one or more Quantity Fields empty.', icon='error')
+                        invalid_entries.append(i)
+                        already_called += 1
+                        if already_called >= 1:
+                            break
+                except Exception:
+                    ms.showerror('Error', 'Please enter a valid number in the Quantity Field.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
 
-                    if highest_val is None:
-                        # Write information to database
-                        c.execute('INSERT INTO ComponentData(id, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?)', (self.name_var_list[i].get(), self.power_var_list[i].get(), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
-                        db.commit()
-                    else:
-                        # Write information to database
-                        c.execute('INSERT INTO ComponentData(id, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?)', (highest_val, self.name_var_list[i].get(), self.power_var_list[i].get(), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
-                        db.commit()
-                    ms.showinfo('Success', 'System Cost Updated.')
+                try:
+                    if self.power_var_list[i].get() == '' or self.power_var_list[i].get() == 0.0:
+                        ms.showerror('Error', 'You left one or more Power Fields empty.', icon='error')
+                        invalid_entries.append(i)
+                        already_called += 1
+                        if already_called >= 1:
+                            break
+                except Exception:
+                    ms.showerror('Error', 'Please enter a valid number in the Power Field.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
+
+            if len(invalid_entries) == 0:
+                # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                for x in range(len(self.name_var_list)):
+                    # Check if its the Turbine Page to calculate the correct results for the turbine costs.
+                    if self.main_notebook.index(self.main_notebook.select()) == 1:
+                        self.turbine_cost = (2984.9 * self.power_var_list[i].get() ** 0.5171)
+                        self.turbine_quantity_cost = self.turbine_cost * int(self.quantity_var_list[i].get())
+                        self.total_turbine_cost += self.turbine_quantity_cost
+
+                        # Find next highest id
+                        select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                        highest_val = [x[0] for x in select_highest_val][0]
+
+                        if highest_val is None:
+                            # Write information to database
+                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[i].get(), self.power_var_list[i].get(), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
+                            db.commit()
+                        else:
+                            # Write information to database
+                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[i].get(), self.power_var_list[i].get(), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
+                            db.commit()
+
+                ms.showinfo('Success', 'System Cost Updated.')
+
+                # Update Results table once this has gone through.
+                #
 
 
 class HeatExchangers():
@@ -332,6 +364,8 @@ class HeatExchangers():
         self.area_var_list = []
         self.quantity_var_list = []
 
+        self.name_iter_list = []
+
     def plate(self, sub_notebook):
         hx_plate_page = tk.Frame(sub_notebook, bg=bg)
         sub_notebook.add(hx_plate_page, text="Plate")
@@ -374,6 +408,8 @@ class HeatExchangers():
         self.name_var_list = []
         self.area_var_list = []
         self.quantity_var_list = []
+
+        self.name_iter_list = []
 
     def acc(self, sub_notebook):
         hx_acc_page = tk.Frame(sub_notebook, bg=bg)
@@ -418,60 +454,137 @@ class HeatExchangers():
         self.area_var_list = []
         self.quantity_var_list = []
 
+        self.name_iter_list = []
+
     def snt_num_press(self):
         self.i += 1
-        self.c = ComponentCreation(self.snt_top_frame, self.snt_mid1_frame, self.snt_mid2_frame, self.snt_mid3_frame, self.snt_bottom_frame, self.name_var_list, self.area_var_list, "Area (m²):", self.quantity_var_list, self.i)
+        self.c = ComponentCreation(self.snt_top_frame, self.snt_mid1_frame, self.snt_mid2_frame, self.snt_mid3_frame, self.snt_bottom_frame, self.name_var_list, self.area_var_list, "Area (m²):", self.quantity_var_list, self.i, self.name_iter_list)
 
     def plate_num_press(self):
         self.i += 1
-        self.c = ComponentCreation(self.plate_top_frame, self.plate_mid1_frame, self.plate_mid2_frame, self.plate_mid3_frame, self.plate_bottom_frame, self.name_var_list, self.area_var_list, "Area (m²):", self.quantity_var_list, self.i)
+        self.c = ComponentCreation(self.plate_top_frame, self.plate_mid1_frame, self.plate_mid2_frame, self.plate_mid3_frame, self.plate_bottom_frame, self.name_var_list, self.area_var_list, "Area (m²):", self.quantity_var_list, self.i, self.name_iter_list)
 
     def acc_num_press(self):
         self.i += 1
-        self.c = ComponentCreation(self.acc_top_frame, self.acc_mid1_frame, self.acc_mid2_frame, self.acc_mid3_frame, self.acc_bottom_frame, self.name_var_list, self.area_var_list, "Area (m²):", self.quantity_var_list, self.i)
+        self.c = ComponentCreation(self.acc_top_frame, self.acc_mid1_frame, self.acc_mid2_frame, self.acc_mid3_frame, self.acc_bottom_frame, self.name_var_list, self.area_var_list, "Area (m²):", self.quantity_var_list, self.i, self.name_iter_list)
 
     def info_press(self):
         self.total_snt_cost = 0
         self.total_plate_cost = 0
         self.total_acc_cost = 0
         already_called = 0
-        # Calculate total cost of components within section using specialised formulae
-        for i in range(len(self.name_var_list)):
-            if self.name_var_list[i].get() == '':
-                ms.showerror('Error', 'You left one or more Name Fields empty.', icon='error')
-                already_called += 1
-                if already_called == 1:
-                    break
-            elif isinstance(self.area_var_list[i].get(), float) != True:
-                ms.showerror('Error', 'Please enter a valid number in the Area Field.', icon='error')
-            else:
-                if self.main_notebook.index(self.main_notebook.select()) == 2:
-                    if self.sub_notebook.index(self.sub_notebook.select()) == 0:
-                        # Shell and Tube
-                        self.snt_cost = (627.6 * self.area_var_list[i].get() ** 0.9199)
-                        self.snt_quantity_cost = self.snt_cost * self.quantity_var_list[i].get()
-                        self.total_snt_cost +=self.snt_quantity_cost
+        invalid_entries = []
+        _type_snt = 'Shell and Tube'
+        _type_plate = 'Plate'
+        _type_acc = 'Air-Cooled Condenser'
 
-                    elif self.sub_notebook.index(self.sub_notebook.select()) == 1:
-                        # Plate
-                        self.plate_cost = (2667.7 * self.area_var_list[i].get() ** 0.3472)
-                        self.plate_quantity_cost = self.plate_cost * self.quantity_var_list[i].get()
-                        self.total_plate_cost +=self.plate_quantity_cost
+        if len(self.name_var_list) == 0:
+            ms.showerror('Error', 'No components entered.', icon='error')
+        else:
+            # Calculate total cost of components within section using specialised formulae
+            for i in range(len(self.name_var_list)):
+                if self.name_var_list[i].get() == '':
+                    ms.showerror('Error', 'You left one or more Name Fields empty.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
+                try:
+                    if self.quantity_var_list[i].get() == '':
+                        ms.showerror('Error', 'You left one or more Quantity Fields empty.', icon='error')
+                        invalid_entries.append(i)
+                        already_called += 1
+                        if already_called >= 1:
+                            break
+                except Exception:
+                    ms.showerror('Error', 'Please enter a valid number in the Quantity Field.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
 
-                    elif self.sub_notebook.index(self.sub_notebook.select()) == 2:
-                        # Air-Cooled Condenser
-                        self.acc_cost = (1706.2 * self.acc_area_1 ** 0.4301)
-                        self.acc_quantity_cost = self.acc_cost * self.quantity_var_list[i].get()
-                        self.total_acc_cost +=self.acc_quantity_cost
+                try:
+                    if self.area_var_list[i].get() == '':
+                        ms.showerror('Error', 'You left one or more Area Fields empty.', icon='error')
+                        invalid_entries.append(i)
+                        already_called += 1
+                        if already_called >= 1:
+                            break
+                except Exception:
+                    ms.showerror('Error', 'Please enter a valid number in the Area Field.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
 
-        ms.showinfo('Success', 'System Cost Updated.')
+            if len(invalid_entries) == 0:
+                for x in range(len(self.name_var_list)):
+                    if self.main_notebook.index(self.main_notebook.select()) == 2:
+                        if self.sub_notebook.index(self.sub_notebook.select()) == 0:
+                            # Shell and Tube
+                            self.snt_cost = (627.6 * self.area_var_list[x].get() ** 0.9199)
+                            self.snt_quantity_cost = self.snt_cost * int(self.quantity_var_list[x].get())
+                            self.total_snt_cost += self.snt_quantity_cost
 
+                            # Find next highest id
+                            select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                            highest_val = [x[0] for x in select_highest_val][0]
+
+                            if highest_val is None:
+                                # Write information to database
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type_snt, self.name_var_list[x].get(), self.area_var_list[x].get(), self.quantity_var_list[x].get(), round(self.snt_cost, 2), round(self.total_snt_cost, 2)))
+                                db.commit()
+                            else:
+                                # Write information to database
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type_snt, self.name_var_list[x].get(), self.area_var_list[x].get(), self.quantity_var_list[x].get(), round(self.snt_cost, 2), round(self.total_snt_cost, 2)))
+                                db.commit()
+
+                        elif self.sub_notebook.index(self.sub_notebook.select()) == 1:
+                            # Plate
+                            self.plate_cost = (2667.7 * self.area_var_list[x].get() ** 0.3472)
+                            self.plate_quantity_cost = self.plate_cost * int(self.quantity_var_list[x].get())
+                            self.total_plate_cost += self.plate_quantity_cost
+
+                            select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                            highest_val = [x[0] for x in select_highest_val][0]
+
+                            if highest_val is None:
+                                # Write information to database
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type_plate, self.name_var_list[x].get(), self.area_var_list[x].get(), self.quantity_var_list[x].get(), round(self.plate_cost, 2), round(self.total_plate_cost, 2)))
+                                db.commit()
+                            else:
+                                # Write information to database
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type_plate, self.name_var_list[x].get(), self.area_var_list[x].get(), self.quantity_var_list[x].get(), round(self.plate_cost, 2), round(self.total_plate_cost, 2)))
+                                db.commit()
+
+                        elif self.sub_notebook.index(self.sub_notebook.select()) == 2:
+                            # Air-Cooled Condenser
+                            self.acc_cost = (1706.2 * self.area_var_list[x].get() ** 0.4301)
+                            self.acc_quantity_cost = self.acc_cost * int(self.quantity_var_list[x].get())
+                            self.total_acc_cost += self.acc_quantity_cost
+
+                            select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                            highest_val = [x[0] for x in select_highest_val][0]
+
+                            if highest_val is None:
+                                # Write information to database
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type_acc, self.name_var_list[x].get(), self.area_var_list[x].get(), self.quantity_var_list[x].get(), round(self.acc_cost, 2), round(self.total_acc_cost, 2)))
+                                db.commit()
+                            else:
+                                # Write information to database
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type_acc, self.name_var_list[x].get(), self.area_var_list[x].get(), self.quantity_var_list[x].get(), round(self.acc_cost, 2), round(self.total_acc_cost, 2)))
+                                db.commit()
+                ms.showinfo('Success', 'System Cost Updated.')
+
+                # Update Results table once this has gone through.
 
 class Pumps():
     def __init__(self, master, main_notebook):
         self.master = master
-        self.pumps_page = tk.Frame(main_notebook, bg=bg)
-        main_notebook.add(self.pumps_page, text='Pumps')
+        self.main_notebook = main_notebook
+
+        self.pumps_page = tk.Frame(self.main_notebook, bg=bg)
+        self.main_notebook.add(self.pumps_page, text='Pumps')
 
         self.i = 0
 
@@ -491,7 +604,7 @@ class Pumps():
         self.bottom_frame = tk.Frame(self.pumps_page, bg='gray17')
         self.bottom_frame.pack(expand=True, fill=tk.BOTH)
 
-        # Entry field to enter how many turbines you want.
+        # Entry field to enter how many pumps you want.
         comp_frame = tk.Frame(self.pumps_page, relief=tk.FLAT, bd=0, bg='gray15')
         comp_frame.pack(side=tk.BOTTOM, anchor=tk.S, expand=True, pady=5, padx=5)
 
@@ -513,44 +626,93 @@ class Pumps():
         self.power_var_list = []
         self.quantity_var_list = []
 
+        self.name_iter_list = []
+
     def num_press(self):
         self.i += 1
-        self.c = ComponentCreation(self.top_frame, self.mid1_frame, self.mid2_frame, self.mid3_frame, self.bottom_frame, self.name_var_list, self.power_var_list, "Power (kW):", self.quantity_var_list, self.i)
+        self.c = ComponentCreation(self.top_frame, self.mid1_frame, self.mid2_frame, self.mid3_frame, self.bottom_frame, self.name_var_list, self.power_var_list, "Power (kW):", self.quantity_var_list, self.i, self.name_iter_list)
 
     def info_press(self):
         self.total_pump_cost = 0
         already_called = 0
-        # Calculate total cost of components within section using specialised formulae
-        for i in range(len(self.name_var_list)):
-            if self.name_var_list[i].get() == '':
-                ms.showerror('Error', 'You left one or more Name Fields empty.', icon='error')
-                already_called += 1
-                if already_called == 1:
-                    break
+        invalid_entries = []
+        _type = 'Pump'
 
-            if self.quantity_var_list[i].get() == '':
-                ms.showerror('Error', 'You left a Quantity Field empty.', icon='error')
-            elif isinstance(self.quantity_var_list[i].get(), int) != True:
-                ms.showerror('Error', 'Please enter a valid number in the Quantity Field.', icon='error')
+        if len(self.name_var_list) == 0:
+            ms.showerror('Error', 'No components entered.', icon='error')
+        else:
+            # Calculate total cost of components within section using specialised formulae
+            for i in range(len(self.name_var_list)):
+                if self.name_var_list[i].get() == '':
+                    ms.showerror('Error', 'You left one or more Name Fields empty.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
 
-            if self.power_var_list[i].get() == '':
-                ms.showerror('Error', 'You left a Power Field empty.', icon='error')
-            elif isinstance(self.power_var_list[i].get(), float) != True:
-                ms.showerror('Error', 'Please enter a valid number in the Power Field.', icon='error')
-            else:
-                # Check if its the Turbine Page to calculate the correct results for the turbine costs.
-                if self.main_notebook.index(self.main_notebook.select()) == 3:
-                    self.pump_cost = (1513.4 * self.power_var_list[i].get() ** 0.1946)
-                    self.pump_quantity_cost = self.pump_cost * self.quantity_var_list[i].get()
-                    self.total_pump_cost += self.pump_quantity_cost
-        ms.showinfo('Success', 'System Cost Updated.')
+                try:
+                    if self.quantity_var_list[i].get() == '':
+                        ms.showerror('Error', 'You left one or more Quantity Fields empty.', icon='error')
+                        invalid_entries.append(i)
+                        already_called += 1
+                        if already_called >= 1:
+                            break
+                except Exception:
+                    ms.showerror('Error', 'Please enter a valid number in the Quantity Field.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
+
+                try:
+                    if self.power_var_list[i].get() == '' or self.power_var_list[i].get() == 0.0:
+                        ms.showerror('Error', 'You left one or more Power Fields empty.', icon='error')
+                        invalid_entries.append(i)
+                        already_called += 1
+                        if already_called >= 1:
+                            break
+                except Exception:
+                    ms.showerror('Error', 'Please enter a valid number in the Power Field.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
+
+            if len(invalid_entries) == 0:
+                # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                for x in range(len(self.name_var_list)):
+                    # Check if its the Turbine Page to calculate the correct results for the turbine costs.
+                    if self.main_notebook.index(self.main_notebook.select()) == 3:
+                        self.pump_cost = (1513.4 * self.power_var_list[x].get() ** 0.1946)
+                        self.pump_quantity_cost = self.pump_cost * int(self.quantity_var_list[x].get())
+                        self.total_pump_cost += self.pump_quantity_cost
+
+                        # Find next highest id
+                        select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                        highest_val = [x[0] for x in select_highest_val][0]
+
+                        if highest_val is None:
+                            # Write information to database
+                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[x].get(), self.power_var_list[x].get(), self.quantity_var_list[x].get(), round(self.pump_cost, 2), round(self.total_pump_cost, 2)))
+                            db.commit()
+                        else:
+                            # Write information to database
+                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[x].get(), self.power_var_list[x].get(), self.quantity_var_list[x].get(), round(self.pump_cost, 2), round(self.total_pump_cost, 2)))
+                            db.commit()
+
+                ms.showinfo('Success', 'System Cost Updated.')
+
+                # Update Results table once this has gone through.
+                #
 
 
 class Expanders():
     def __init__(self, master, main_notebook):
         self.master = master
-        self.expanders_page = tk.Frame(main_notebook, bg=bg)
-        main_notebook.add(self.expanders_page, text='Expanders')
+        self.main_notebook = main_notebook
+
+        self.expanders_page = tk.Frame(self.main_notebook, bg=bg)
+        self.main_notebook.add(self.expanders_page, text='Expanders')
 
         self.i = 0
 
@@ -570,7 +732,7 @@ class Expanders():
         self.bottom_frame = tk.Frame(self.expanders_page, bg='gray17')
         self.bottom_frame.pack(expand=True, fill=tk.BOTH)
 
-        # Entry field to enter how many turbines you want.
+        # Entry field to enter how many expanders you want.
         comp_frame = tk.Frame(self.expanders_page, relief=tk.FLAT, bd=0, bg='gray15')
         comp_frame.pack(side=tk.BOTTOM, anchor=tk.S, expand=True, pady=5, padx=5)
 
@@ -592,44 +754,92 @@ class Expanders():
         self.power_var_list = []
         self.quantity_var_list = []
 
+        self.name_iter_list = []
+
     def num_press(self):
         self.i += 1
-        self.c = ComponentCreation(self.top_frame, self.mid1_frame, self.mid2_frame, self.mid3_frame, self.bottom_frame, self.name_var_list, self.power_var_list, "Power (kW):",self.quantity_var_list, self.i)
+        self.c = ComponentCreation(self.top_frame, self.mid1_frame, self.mid2_frame, self.mid3_frame, self.bottom_frame, self.name_var_list, self.power_var_list, "Power (kW):",self.quantity_var_list, self.i, self.name_iter_list)
 
     def info_press(self):
         self.total_expander_cost = 0
         already_called = 0
-        # Calculate total cost of components within section using specialised formulae
-        for i in range(len(self.name_var_list)):
-            if self.name_var_list[i].get() == '':
-                ms.showerror('Error', 'You left one or more Name Fields empty.', icon='error')
-                already_called += 1
-                if already_called == 1:
-                    break
+        invalid_entries = []
+        _type = 'Expander'
 
-            if self.quantity_var_list[i].get() == '':
-                ms.showerror('Error', 'You left a Quantity Field empty.', icon='error')
-            elif isinstance(self.quantity_var_list[i].get(), int) != True:
-                ms.showerror('Error', 'Please enter a valid number in the Quantity Field.', icon='error')
+        if len(self.name_var_list) == 0:
+            ms.showerror('Error', 'No components entered.', icon='error')
+        else:
+            # Calculate total cost of components within section using specialised formulae
+            for i in range(len(self.name_var_list)):
+                if self.name_var_list[i].get() == '':
+                    ms.showerror('Error', 'You left one or more Name Fields empty.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
 
-            if self.power_var_list[i].get() == '':
-                ms.showerror('Error', 'You left a Power Field empty.', icon='error')
-            elif isinstance(self.power_var_list[i].get(), float) != True:
-                ms.showerror('Error', 'Please enter a valid number in the Power Field.', icon='error')
-            else:
-                # Check if its the Turbine Page to calculate the correct results for the turbine costs.
-                if self.main_notebook.index(self.main_notebook.select()) == 4:
-                    self.expander_cost = (544 * self.power_var_list[i].get() ** 0.8331)
-                    self.expander_quantity_cost = self.expander_cost * self.quantity_var_list[i].get()
-                    self.total_expander_cost +=self.expander_quantity_cost
-        ms.showinfo('Success', 'System Cost Updated.')
+                try:
+                    if self.quantity_var_list[i].get() == '':
+                        ms.showerror('Error', 'You left one or more Quantity Fields empty.', icon='error')
+                        invalid_entries.append(i)
+                        already_called += 1
+                        if already_called >= 1:
+                            break
+                except Exception:
+                    ms.showerror('Error', 'Please enter a valid number in the Quantity Field.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
+
+                try:
+                    if self.power_var_list[i].get() == '' or self.power_var_list[i].get() == 0.0:
+                        ms.showerror('Error', 'You left one or more Power Fields empty.', icon='error')
+                        invalid_entries.append(i)
+                        already_called += 1
+                        if already_called >= 1:
+                            break
+                except Exception:
+                    ms.showerror('Error', 'Please enter a valid number in the Power Field.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
+
+            if len(invalid_entries) == 0:
+                # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                for x in range(len(self.name_var_list)):
+                    # Check if its the Turbine Page to calculate the correct results for the turbine costs.
+                    if self.main_notebook.index(self.main_notebook.select()) == 4:
+                        self.expander_cost = (544 * self.power_var_list[x].get() ** 0.8331)
+                        self.expander_quantity_cost = self.expander_cost * int(self.quantity_var_list[x].get())
+                        self.total_expander_cost += self.expander_quantity_cost
+
+                        # Find next highest id
+                        select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                        highest_val = [x[0] for x in select_highest_val][0]
+
+                        if highest_val is None:
+                            # Write information to database
+                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[x].get(), self.power_var_list[x].get(), self.quantity_var_list[x].get(), round(self.expander_cost, 2), round(self.total_expander_cost, 2)))
+                            db.commit()
+                        else:
+                            # Write information to database
+                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[x].get(), self.power_var_list[x].get(), self.quantity_var_list[x].get(), round(self.expander_cost, 2), round(self.total_expander_cost, 2)))
+                            db.commit()
+
+                ms.showinfo('Success', 'System Cost Updated.')
+
+                # Update Results table once this has gone through.
+                #
 
 
 class StorageTanks():
     def __init__(self, master, main_notebook):
         self.master = master
-        self.st_page = tk.Frame(main_notebook, bg=bg)
-        main_notebook.add(self.st_page, text='Storage Tanks')
+        self.main_notebook = main_notebook
+        self.st_page = tk.Frame(self.main_notebook, bg=bg)
+        self.main_notebook.add(self.st_page, text='Storage Tanks')
 
         self.i = 0
 
@@ -649,7 +859,7 @@ class StorageTanks():
         self.bottom_frame = tk.Frame(self.st_page, bg='gray17')
         self.bottom_frame.pack(expand=True, fill=tk.BOTH)
 
-        # Entry field to enter how many turbines you want.
+        # Entry field to enter how many storage tanks you want.
         comp_frame = tk.Frame(self.st_page, relief=tk.FLAT, bd=0, bg='gray15')
         comp_frame.pack(side=tk.BOTTOM, anchor=tk.S, expand=True, pady=5, padx=5)
 
@@ -671,37 +881,84 @@ class StorageTanks():
         self.volume_var_list = []
         self.quantity_var_list = []
 
+        self.name_iter_list = []
+
     def num_press(self):
         self.i += 1
-        self.c = ComponentCreation(self.top_frame, self.mid1_frame, self.mid2_frame, self.mid3_frame, self.bottom_frame, self.name_var_list, self.volume_var_list, "Volume (L):", self.quantity_var_list, self.i)
+        self.c = ComponentCreation(self.top_frame, self.mid1_frame, self.mid2_frame, self.mid3_frame, self.bottom_frame, self.name_var_list, self.volume_var_list, "Volume (L):", self.quantity_var_list, self.i, self.name_iter_list)
 
     def info_press(self):
         self.total_st_cost = 0
         already_called = 0
-        # Calculate total cost of components within section using specialised formulae
-        for i in range(len(self.name_var_list)):
-            if self.name_var_list[i].get() == '':
-                ms.showerror('Error', 'You left one or more Name Fields empty.', icon='error')
-                already_called += 1
-                if already_called == 1:
-                    break
+        invalid_entries = []
+        _type = 'Storage Tank'
 
-            if self.quantity_var_list[i].get() == '':
-                ms.showerror('Error', 'You left a Quantity Field empty.', icon='error')
-            elif isinstance(self.quantity_var_list[i].get(), int) != True:
-                ms.showerror('Error', 'Please enter a valid number in the Quantity Field.', icon='error')
+        if len(self.name_var_list) == 0:
+            ms.showerror('Error', 'No components entered.', icon='error')
+        else:
+            # Calculate total cost of components within section using specialised formulae
+            for i in range(len(self.name_var_list)):
+                if self.name_var_list[i].get() == '':
+                    ms.showerror('Error', 'You left one or more Name Fields empty.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
 
-            if self.volume_var_list[i].get() == '':
-                ms.showerror('Error', 'You left a Volume Field empty.', icon='error')
-            elif isinstance(self.volume_var_list[i].get(), float) != True:
-                ms.showerror('Error', 'Please enter a valid number in the Volume Field.', icon='error')
-            else:
-                # Check if its the Turbine Page to calculate the correct results for the turbine costs.
-                if self.main_notebook.index(self.main_notebook.select()) == 5:
-                    self.st_cost = (52.6 * self.st_volume_1 ** 0.5531)
-                    self.st_quantity_cost = self.st_cost * self.quantity_var_list[i].get()
-                    self.total_st_cost +=self.st_quantity_cost
-        ms.showinfo('Success', 'System Cost Updated.')
+                try:
+                    if self.quantity_var_list[i].get() == '':
+                        ms.showerror('Error', 'You left one or more Quantity Fields empty.', icon='error')
+                        invalid_entries.append(i)
+                        already_called += 1
+                        if already_called >= 1:
+                            break
+                except Exception:
+                    ms.showerror('Error', 'Please enter a valid number in the Quantity Field.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
+
+                try:
+                    if self.volume_var_list[i].get() == '' or self.volume_var_list[i].get() == 0.0:
+                        ms.showerror('Error', 'You left one or more Volume Fields empty.', icon='error')
+                        invalid_entries.append(i)
+                        already_called += 1
+                        if already_called >= 1:
+                            break
+                except Exception:
+                    ms.showerror('Error', 'Please enter a valid number in the Volume Field.', icon='error')
+                    invalid_entries.append(i)
+                    already_called += 1
+                    if already_called >= 1:
+                        break
+
+            if len(invalid_entries) == 0:
+                # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                for x in range(len(self.name_var_list)):
+                    # Check if its the Turbine Page to calculate the correct results for the turbine costs.
+                    if self.main_notebook.index(self.main_notebook.select()) == 5:
+                        self.st_cost = (52.6 * self.volume_var_list[x].get() ** 0.5531)
+                        self.st_quantity_cost = self.st_cost * int(self.quantity_var_list[x].get())
+                        self.total_st_cost += self.st_quantity_cost
+
+                        # Find next highest id
+                        select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                        highest_val = [x[0] for x in select_highest_val][0]
+
+                        if highest_val is None:
+                            # Write information to database
+                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[x].get(), self.volume_var_list[x].get(), self.quantity_var_list[x].get(), round(self.st_cost, 2), round(self.total_st_cost, 2)))
+                            db.commit()
+                        else:
+                            # Write information to database
+                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[x].get(), self.volume_var_list[x].get(), self.quantity_var_list[x].get(), round(self.st_cost, 2), round(self.total_st_cost, 2)))
+                            db.commit()
+
+                ms.showinfo('Success', 'System Cost Updated.')
+
+                # Update Results table once this has gone through.
+                #
 
 
 class Results():
@@ -736,8 +993,8 @@ class Results():
         for i in range(len(comp_values)):
             try:
                 self.treeview.insert('', tk.END,
-                                     values=(comp_values_fetch[i][0], comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3],
-                                             comp_values_fetch[i][4], comp_values_fetch[i][5]))
+                                     values=(comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
+                                             comp_values_fetch[i][5], comp_values_fetch[i][6]))
                 i += 1
             except IndexError:
                 # Insert an empty string if this error is caught
@@ -765,8 +1022,12 @@ class Results():
         results_button.pack(side=tk.BOTTOM, anchor=tk.S, pady=15, padx=15)
 
         self.results_label = tk.Label(results_frame, bg='gray15')
-        self.results_label.config(bd=0, text='Total System Cost: £0', font='System 6', fg='yellow')
+        self.results_label.config(bd=0, text='Total System Cost: £0.00', font='System 6', fg='yellow')
         self.results_label.pack()
+
+        self.results_quantity_total_label = tk.Label(results_frame, bg='gray15')
+        self.results_quantity_total_label.config(bd=0, text='Across 0 Components', font='System 6', fg='yellow')
+        self.results_quantity_total_label.pack()
 
         #HELP PAGE
 
@@ -774,6 +1035,12 @@ class Results():
         # Get all the total_cost values from the table.
         # Add them all together. BANG!
         total_system_cost = 0
+        total_quantity = 0
+
+        comp_values_quantity_fetch = c.execute('SELECT quantity FROM ComponentData').fetchall()
+        comp_values_quantity = [x[0] for x in comp_values_quantity_fetch]
+        for quantity in comp_values_quantity:
+            total_quantity += quantity
 
         comp_values_individual_costs_fetch = c.execute('SELECT total_cost FROM ComponentData').fetchall()
         comp_values_individual_costs = [x[0] for x in comp_values_individual_costs_fetch]
@@ -781,7 +1048,8 @@ class Results():
             total_system_cost += individual_cost
 
         self.results_label["text"] = 'Total System Cost: £%.2f' % total_system_cost
-        ms.showinfo('Updated', 'Cost has been updated to £%.2f' % total_system_cost)
+        self.results_quantity_total_label["text"] = 'Across %d Components' % total_quantity
+        ms.showinfo('Updated', 'Cost has been updated to £{total_system_cost}\nAcross {total_quantity} Components'.format(total_system_cost=total_system_cost, total_quantity=total_quantity))
 
     # Treeview sorting algorithm
     def treeview_sort_column(self, tv, col, reverse):
@@ -808,12 +1076,15 @@ class About():
 
 class MainApp():
     def __init__(self, master):
+        self.master = master
         master.configure(bg='gray15')
         master.title('Component Cost Calculator')
         master.option_add('*Font', 'System 12')
         master.option_add('*Label.Font', 'System 14')
         master.geometry('1920x1080')
         master.wm_state('zoomed')
+
+        master.protocol("WM_DELETE_WINDOW", self.on_close)
 
         global_frame = tk.Frame(master, relief=tk.FLAT, bd=1, bg='gray15')
         global_frame.pack(fill=tk.BOTH, side=tk.TOP)
@@ -827,12 +1098,22 @@ class MainApp():
 
         Home(master, main_notebook)
         Turbines(master, main_notebook)
-        HeatExchangers(master, main_notebook) 
+        HeatExchangers(master, main_notebook)
         Pumps(master, main_notebook)
         Expanders(master, main_notebook)
         StorageTanks(master, main_notebook)
         Results(master, main_notebook)
         About(master, main_notebook)
+
+    def on_close(self):
+        close = ms.askokcancel('Cancel', 'Would you like to close the program?')
+        if close:
+            # Give a warning about items in the database deleting themselves upon closing.
+            ms.askokcancel('WARNING', 'THE COMPONENTS CURRENTLY SAVED IN THE DATABASE WILL BE DELETED UPON CLOSING THE SYSTEM.\n\nDO YOU STILL WISH TO PROCEED?', icon='warning')
+            # Delete all values currently in the database upon closing
+            c.execute('DELETE FROM ComponentData')
+            db.commit()
+            self.master.destroy()
 
 
 def main():
