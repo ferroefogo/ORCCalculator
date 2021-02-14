@@ -250,7 +250,6 @@ class Turbines():
                     already_called += 1
                     if already_called >= 1:
                         break
-
                 try:
                     if self.quantity_var_list[i].get() == '':
                         ms.showerror('Error', 'You left one or more Quantity Fields empty.', icon='error')
@@ -280,6 +279,17 @@ class Turbines():
                         break
 
             if len(invalid_entries) == 0:
+                # Check if the name of the component is equal to any other names in the database.
+                comp_names_db = c.execute('SELECT name FROM ComponentData').fetchall()
+                for x in range(len(comp_names_db)):
+                    if self.name_var_list[i].get() in comp_names_db:
+                        confirm_duplicate = ms.askquestion("One of the components you have entered has the same name as another component currently in the database.\nAre you sure this isn't a duplicate?")
+
+                        if confirm_duplicate == 'yes':
+                            self.name_var_list.pop(i)
+                            self.power_var_list.pop(i)
+                            self.quantity_var_list.pop(i)
+
                 # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
                 for x in range(len(self.name_var_list)):
                     # Check if its the Turbine Page to calculate the correct results for the turbine costs.
@@ -304,7 +314,28 @@ class Turbines():
                 ms.showinfo('Success', 'System Cost Updated.')
 
                 # Update Results table once this has gone through.
-                #
+                # Get values from database
+                comp_values_fetch = c.execute('SELECT * FROM ComponentData').fetchall()
+                comp_values = [x[0] for x in comp_values_fetch]
+
+                r = Results(self.master, self.main_notebook)
+                # Clear the table and re-populate it.
+                for i in r.treeview.get_children():
+                    r.treeview.delete(i)
+
+                # Update Results table once this has gone through.
+                for i in range(len(comp_values)):
+                    try:
+                        r.treeview.insert('', tk.END,
+                                             values=(comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
+                                                     comp_values_fetch[i][5], comp_values_fetch[i][6]))
+                        i += 1
+                    except IndexError:
+                        # Insert an empty string if this error is caught
+                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', ''))
+                        i += 1
+                    r.treeview.pack(pady=2, padx=2)
+                
 
 
 class HeatExchangers():
@@ -577,6 +608,27 @@ class HeatExchangers():
                 ms.showinfo('Success', 'System Cost Updated.')
 
                 # Update Results table once this has gone through.
+                # Get values from database
+                comp_values_fetch = c.execute('SELECT * FROM ComponentData').fetchall()
+                comp_values = [x[0] for x in comp_values_fetch]
+
+                r = Results(self.master, self.main_notebook)
+                # Clear the table and re-populate it.
+                for i in r.treeview.get_children():
+                    r.treeview.delete(i)
+
+                # Update Results table once this has gone through.
+                for i in range(len(comp_values)):
+                    try:
+                        r.treeview.insert('', tk.END,
+                                             values=(comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
+                                                     comp_values_fetch[i][5], comp_values_fetch[i][6]))
+                        i += 1
+                    except IndexError:
+                        # Insert an empty string if this error is caught
+                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', ''))
+                        i += 1
+                    r.treeview.pack(pady=2, padx=2)
 
 class Pumps():
     def __init__(self, master, main_notebook):
@@ -703,7 +755,27 @@ class Pumps():
                 ms.showinfo('Success', 'System Cost Updated.')
 
                 # Update Results table once this has gone through.
-                #
+                # Get values from database
+                comp_values_fetch = c.execute('SELECT * FROM ComponentData').fetchall()
+                comp_values = [x[0] for x in comp_values_fetch]
+
+                r = Results(self.master, self.main_notebook)
+                # Clear the table and re-populate it.
+                for i in r.treeview.get_children():
+                    r.treeview.delete(i)
+
+                # Update Results table once this has gone through.
+                for i in range(len(comp_values)):
+                    try:
+                        r.treeview.insert('', tk.END,
+                                             values=(comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
+                                                     comp_values_fetch[i][5], comp_values_fetch[i][6]))
+                        i += 1
+                    except IndexError:
+                        # Insert an empty string if this error is caught
+                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', ''))
+                        i += 1
+                    r.treeview.pack(pady=2, padx=2)
 
 
 class Expanders():
@@ -831,7 +903,27 @@ class Expanders():
                 ms.showinfo('Success', 'System Cost Updated.')
 
                 # Update Results table once this has gone through.
-                #
+                # Get values from database
+                comp_values_fetch = c.execute('SELECT * FROM ComponentData').fetchall()
+                comp_values = [x[0] for x in comp_values_fetch]
+
+                r = Results(self.master, self.main_notebook)
+                # Clear the table and re-populate it.
+                for i in r.treeview.get_children():
+                    r.treeview.delete(i)
+
+                # Update Results table once this has gone through.
+                for i in range(len(comp_values)):
+                    try:
+                        r.treeview.insert('', tk.END,
+                                             values=(comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
+                                                     comp_values_fetch[i][5], comp_values_fetch[i][6]))
+                        i += 1
+                    except IndexError:
+                        # Insert an empty string if this error is caught
+                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', ''))
+                        i += 1
+                    r.treeview.pack(pady=2, padx=2)
 
 
 class StorageTanks():
@@ -957,8 +1049,27 @@ class StorageTanks():
 
                 ms.showinfo('Success', 'System Cost Updated.')
 
+                # Get values from database
+                comp_values_fetch = c.execute('SELECT * FROM ComponentData').fetchall()
+                comp_values = [x[0] for x in comp_values_fetch]
+
+                r = Results(self.master, self.main_notebook)
+                # Clear the table and re-populate it.
+                for i in r.treeview.get_children():
+                    r.treeview.delete(i)
+
                 # Update Results table once this has gone through.
-                #
+                for i in range(len(comp_values)):
+                    try:
+                        r.treeview.insert('', tk.END,
+                                             values=(comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
+                                                     comp_values_fetch[i][5], comp_values_fetch[i][6]))
+                        i += 1
+                    except IndexError:
+                        # Insert an empty string if this error is caught
+                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', ''))
+                        i += 1
+                    r.treeview.pack(pady=2, padx=2)
 
 
 class Results():
@@ -1019,17 +1130,47 @@ class Results():
         results_button = tk.Button(results_frame)
         results_button.config(relief=tk.RAISED, bd=5, text='    Calculate    ',
                                  command=self.total_cost_calculate)
-        results_button.pack(side=tk.BOTTOM, anchor=tk.S, pady=15, padx=15)
+        results_button.pack(side=tk.TOP, anchor=tk.S, pady=15, padx=15)
+
+        total_system_cost = 0
+        total_quantity = 0
+
+        comp_values_quantity_fetch = c.execute('SELECT quantity FROM ComponentData').fetchall()
+        comp_values_quantity = [x[0] for x in comp_values_quantity_fetch]
+        for quantity in comp_values_quantity:
+            total_quantity += quantity
+
+        comp_values_individual_costs_fetch = c.execute('SELECT total_cost FROM ComponentData').fetchall()
+        comp_values_individual_costs = [x[0] for x in comp_values_individual_costs_fetch]
+        for individual_cost in comp_values_individual_costs:
+            total_system_cost += individual_cost
 
         self.results_label = tk.Label(results_frame, bg='gray15')
-        self.results_label.config(bd=0, text='Total System Cost: £0.00', font='System 6', fg='yellow')
+        self.results_label.config(bd=0, text='Total System Cost: £%.2f' % total_system_cost, font='System 6', fg='yellow')
         self.results_label.pack()
 
         self.results_quantity_total_label = tk.Label(results_frame, bg='gray15')
-        self.results_quantity_total_label.config(bd=0, text='Across 0 Components', font='System 6', fg='yellow')
+        self.results_quantity_total_label.config(bd=0, text='Across %d Components' % total_quantity, font='System 6', fg='yellow')
         self.results_quantity_total_label.pack()
 
-        #HELP PAGE
+        # Clear Database button
+        clear_db_btn = tk.Button(results_frame)
+        clear_db_btn.config(relief=tk.RAISED, bd=5, text='    Clear Database    ',
+                                 command=self.clear_database)
+        clear_db_btn.pack(side=tk.BOTTOM, anchor=tk.S, pady=15, padx=15)
+
+        # HELP PAGE
+
+    def clear_database(self):
+        confirm_clear = ms.askokcancel('WARNING', 'Clearing the database is permanent.\nAny components that were stored will be deleted forever.\nDo you wish to continue?')
+        if confirm_clear:
+            # Clear the database
+            c.execute('DELETE FROM ComponentData')
+            db.commit()
+
+            # Clear the results treeview table.
+            for i in self.treeview.get_children():
+                self.treeview.delete(i)
 
     def total_cost_calculate(self):
         # Get all the total_cost values from the table.
@@ -1105,14 +1246,21 @@ class MainApp():
         Results(master, main_notebook)
         About(master, main_notebook)
 
+        fetch_all = c.execute("SELECT * FROM ComponentData").fetchall()
+
+        if len(fetch_all) > 0:
+            master.after(1, self.abort_database)
+
+    def abort_database(self):
+        abort_db = ms.askokcancel('Warning', 'There are currently values in the database that were saved from the previous session.\nDo you wish to reset the database or continue as is?', icon='warning')
+        if abort_db:
+            # Reset the database
+            c.execute('DELETE FROM ComponentData')
+            db.commit()
+
     def on_close(self):
         close = ms.askokcancel('Cancel', 'Would you like to close the program?')
         if close:
-            # Give a warning about items in the database deleting themselves upon closing.
-            ms.askokcancel('WARNING', 'THE COMPONENTS CURRENTLY SAVED IN THE DATABASE WILL BE DELETED UPON CLOSING THE SYSTEM.\n\nDO YOU STILL WISH TO PROCEED?', icon='warning')
-            # Delete all values currently in the database upon closing
-            c.execute('DELETE FROM ComponentData')
-            db.commit()
             self.master.destroy()
 
 
