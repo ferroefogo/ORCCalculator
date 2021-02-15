@@ -280,43 +280,74 @@ class Turbines():
 
             if len(invalid_entries) == 0:
                 # Check if the name of the component is equal to any other names in the database.
-                comp_names_db = c.execute('SELECT name FROM ComponentData').fetchall()
-                for x in range(len(comp_names_db)):
-                    if self.name_var_list[i].get() in comp_names_db:
-                        confirm_duplicate = ms.askquestion("One of the components you have entered has the same name as another component currently in the database.\nAre you sure this isn't a duplicate?")
+                comp_names_db_fetch = c.execute('SELECT name FROM ComponentData').fetchall()
+                comp_names_db = [x[0] for x in comp_names_db_fetch]
 
-                        if confirm_duplicate == 'yes':
-                            self.name_var_list.pop(i)
-                            self.power_var_list.pop(i)
-                            self.quantity_var_list.pop(i)
+                duplicates_count = 0
 
-                # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
                 for x in range(len(self.name_var_list)):
-                    # Check if its the Turbine Page to calculate the correct results for the turbine costs.
-                    if self.main_notebook.index(self.main_notebook.select()) == 1:
-                        self.turbine_cost = (2984.9 * self.power_var_list[i].get() ** 0.5171)
-                        self.turbine_quantity_cost = self.turbine_cost * int(self.quantity_var_list[i].get())
-                        self.total_turbine_cost += self.turbine_quantity_cost
+                    if self.name_var_list[x].get() in comp_names_db:
+                        duplicates_count += 1
 
-                        # Find next highest id
-                        select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
-                        highest_val = [x[0] for x in select_highest_val][0]
+                if duplicates_count > 0:
+                    confirm_duplicate = ms.askquestion("Overwrite Warning", "One or more of the components you have entered has the same name as another component currently in the database.\n\nIf Yes, this entry will be removed.\nIf No, it will be added along the rest of the components, however it can be removed at a later date using the tools in ther Results Page.\n\nConfirm that this is a duplicate entry.")
+                    if confirm_duplicate == 'yes':
+                        # Stop the adding of the items to the database
+                        print("yes")
+                    else:
+                        # Continue letting the items go
+                        # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                        for x in range(len(self.name_var_list)):
+                            # Check if its the Turbine Page to calculate the correct results for the turbine costs.
+                            if self.main_notebook.index(self.main_notebook.select()) == 1:
+                                self.turbine_cost = (2984.9 * self.power_var_list[i].get() ** 0.5171)
+                                self.turbine_quantity_cost = self.turbine_cost * int(self.quantity_var_list[i].get())
+                                self.total_turbine_cost += self.turbine_quantity_cost
 
-                        if highest_val is None:
-                            # Write information to database
-                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[i].get(), self.power_var_list[i].get(), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
-                            db.commit()
-                        else:
-                            # Write information to database
-                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[i].get(), self.power_var_list[i].get(), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
-                            db.commit()
+                                # Find next highest id
+                                select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                                highest_val = [x[0] for x in select_highest_val][0]
 
-                ms.showinfo('Success', 'System Cost Updated.')
+                                if highest_val is None:
+                                    # Write information to database
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[i].get(), self.power_var_list[i].get(), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
+                                    db.commit()
+                                else:
+                                    # Write information to database
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[i].get(), self.power_var_list[i].get(), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
+                                    db.commit()
+                        ms.showinfo('Success', 'System Cost Updated.')
+                else:
+                    # Continue letting the items go
+                    # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                    for x in range(len(self.name_var_list)):
+                        # Check if its the Turbine Page to calculate the correct results for the turbine costs.
+                        if self.main_notebook.index(self.main_notebook.select()) == 1:
+                            self.turbine_cost = (2984.9 * self.power_var_list[i].get() ** 0.5171)
+                            self.turbine_quantity_cost = self.turbine_cost * int(self.quantity_var_list[i].get())
+                            self.total_turbine_cost += self.turbine_quantity_cost
+
+                            # Find next highest id
+                            select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                            highest_val = [x[0] for x in select_highest_val][0]
+
+                            if highest_val is None:
+                                # Write information to database
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[i].get(), self.power_var_list[i].get(), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
+                                db.commit()
+                            else:
+                                # Write information to database
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[i].get(), self.power_var_list[i].get(), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
+                                db.commit()
+                    ms.showinfo('Success', 'System Cost Updated.')
 
                 # Update Results table once this has gone through.
                 # Get values from database
                 comp_values_fetch = c.execute('SELECT * FROM ComponentData').fetchall()
                 comp_values = [x[0] for x in comp_values_fetch]
+
+                # Delete the current results page and recreate it.
+                self.main_notebook.forget(6)
 
                 r = Results(self.master, self.main_notebook)
                 # Clear the table and re-populate it.
@@ -335,7 +366,6 @@ class Turbines():
                         r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', ''))
                         i += 1
                     r.treeview.pack(pady=2, padx=2)
-                
 
 
 class HeatExchangers():
@@ -549,6 +579,20 @@ class HeatExchangers():
                         break
 
             if len(invalid_entries) == 0:
+                # Check if the name of the component is equal to any other names in the database.
+                comp_names_db_fetch = c.execute('SELECT name FROM ComponentData').fetchall()
+                comp_names_db = [x[0] for x in comp_names_db_fetch]
+                for x in range(len(comp_names_db)):
+                    try:
+                        if self.name_var_list[x].get() in comp_names_db:
+                            confirm_duplicate = ms.askquestion("Overwrite Warning", "One or more of the components you have entered has the same name as another component currently in the database.\n\nIf Yes, this entry will be removed.\nIf No, it will be added along the rest of the components, however it can be removed at a later date using the tools in ther Results Page.\n\nConfirm that this is a duplicate entry.")
+
+                            if confirm_duplicate == 'yes':
+                                self.name_var_list.pop(i)
+                                self.area_var_list.pop(i)
+                                self.quantity_var_list.pop(i)
+                    except IndexError:
+                        pass
                 for x in range(len(self.name_var_list)):
                     if self.main_notebook.index(self.main_notebook.select()) == 2:
                         if self.sub_notebook.index(self.sub_notebook.select()) == 0:
@@ -629,6 +673,7 @@ class HeatExchangers():
                         r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', ''))
                         i += 1
                     r.treeview.pack(pady=2, padx=2)
+
 
 class Pumps():
     def __init__(self, master, main_notebook):
@@ -731,6 +776,20 @@ class Pumps():
                         break
 
             if len(invalid_entries) == 0:
+                # Check if the name of the component is equal to any other names in the database.
+                comp_names_db_fetch = c.execute('SELECT name FROM ComponentData').fetchall()
+                comp_names_db = [x[0] for x in comp_names_db_fetch]
+                for x in range(len(comp_names_db)):
+                    try:
+                        if self.name_var_list[x].get() in comp_names_db:
+                            confirm_duplicate = ms.askquestion("Overwrite Warning", "One or more of the components you have entered has the same name as another component currently in the database.\n\nIf Yes, this entry will be removed.\nIf No, it will be added along the rest of the components, however it can be removed at a later date using the tools in ther Results Page.\n\nConfirm that this is a duplicate entry.")
+
+                            if confirm_duplicate == 'yes':
+                                self.name_var_list.pop(x)
+                                self.power_var_list.pop(x)
+                                self.quantity_var_list.pop(x)
+                    except IndexError:
+                        pass
                 # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
                 for x in range(len(self.name_var_list)):
                     # Check if its the Turbine Page to calculate the correct results for the turbine costs.
@@ -879,6 +938,20 @@ class Expanders():
                         break
 
             if len(invalid_entries) == 0:
+                # Check if the name of the component is equal to any other names in the database.
+                comp_names_db_fetch = c.execute('SELECT name FROM ComponentData').fetchall()
+                comp_names_db = [x[0] for x in comp_names_db_fetch]
+                for x in range(len(comp_names_db)):
+                    try:
+                        if self.name_var_list[x].get() in comp_names_db:
+                            confirm_duplicate = ms.askquestion("Overwrite Warning", "One or more of the components you have entered has the same name as another component currently in the database.\n\nIf Yes, this entry will be removed.\nIf No, it will be added along the rest of the components, however it can be removed at a later date using the tools in ther Results Page.\n\nConfirm that this is a duplicate entry.")
+
+                            if confirm_duplicate == 'yes':
+                                self.name_var_list.pop(x)
+                                self.power_var_list.pop(x)
+                                self.quantity_var_list.pop(x)
+                    except IndexError:
+                        pass
                 # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
                 for x in range(len(self.name_var_list)):
                     # Check if its the Turbine Page to calculate the correct results for the turbine costs.
@@ -1026,6 +1099,20 @@ class StorageTanks():
                         break
 
             if len(invalid_entries) == 0:
+                # Check if the name of the component is equal to any other names in the database.
+                comp_names_db_fetch = c.execute('SELECT name FROM ComponentData').fetchall()
+                comp_names_db = [x[0] for x in comp_names_db_fetch]
+                for x in range(len(comp_names_db)):
+                    try:
+                        if self.name_var_list[x].get() in comp_names_db:
+                            confirm_duplicate = ms.askquestion("Overwrite Warning", "One or more of the components you have entered has the same name as another component currently in the database.\n\nIf Yes, this entry will be removed.\nIf No, it will be added along the rest of the components, however it can be removed at a later date using the tools in ther Results Page.\n\nConfirm that this is a duplicate entry.")
+
+                            if confirm_duplicate == 'yes':
+                                self.name_var_list.pop(i)
+                                self.volume_var_list.pop(i)
+                                self.quantity_var_list.pop(i)
+                    except IndexError:
+                        pass
                 # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
                 for x in range(len(self.name_var_list)):
                     # Check if its the Turbine Page to calculate the correct results for the turbine costs.
@@ -1077,6 +1164,7 @@ class Results():
         self.master = master
         results_page = tk.Frame(main_notebook, bg=bg)
         main_notebook.add(results_page, text='Results')
+        main_notebook.insert(6, results_page)
 
         # RESULTS PAGE
         treeview_frame = tk.Frame(results_page, relief=tk.GROOVE, bd=0, bg='gray15')
