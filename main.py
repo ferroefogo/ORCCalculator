@@ -3,11 +3,9 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox as ms
 import sqlite3
-import re
 
 bg = 'gray20'
 fg = 'yellow'
-
 
 # Connect to database
 with sqlite3.connect('ComponentData.db') as db:
@@ -180,6 +178,48 @@ class Home():
         home_page = tk.Frame(main_notebook, bg=bg)
         main_notebook.add(home_page, text='Home')
 
+        home_frame = tk.Frame(home_page, bg='gray20')
+        home_frame.pack(expand=True, fill=tk.BOTH)
+
+        title_label = tk.Label(home_frame)
+        title_label.config(bd=0, text='How to use this software', font='System 30', bg='gray20', fg='yellow')
+        title_label.pack(expand=True, fill=tk.BOTH, anchor=tk.N)
+
+        howtouse_frame = tk.Frame(home_frame, bg='gray20')
+        howtouse_frame.pack(fill=tk.BOTH, expand=True)
+
+        tip_label_1 = tk.Label(howtouse_frame, bg='gray20', fg='yellow')
+        tip_label_1.config(bd=0, text="- Each tab shows each component and where said components' information must be entered.\n")
+        tip_label_1.pack(side=tk.TOP)
+
+        tip_label_2 = tk.Label(howtouse_frame, bg='gray20', fg='yellow')
+        tip_label_2.config(bd=0, text='- Create up to 30 components under each tab and enter your information into each.\n')
+        tip_label_2.pack(side=tk.TOP)
+
+        tip_label_3 = tk.Label(howtouse_frame, bg='gray20', fg='yellow')
+        tip_label_3.config(bd=0, text="- Press the 'Enter Information' button once you have made sure all information entered is correct and you want to submit it into the final system cost calculation.\n")
+        tip_label_3.pack(side=tk.TOP)
+
+        tip_label_4 = tk.Label(howtouse_frame, bg='gray20', fg='yellow')
+        tip_label_4.config(bd=0, text="- If you would like to go back and make a change, just edit the component information of the component in question and press the 'Enter Information' button again.\nOR you can edit the name, power/area/volume and quantity values of a component in the Results page's table by LEFT CLICKING the relevant row.")
+        tip_label_4.pack(side=tk.TOP)
+
+        tip_label_5 = tk.Label(howtouse_frame, bg='gray20', fg='yellow')
+        tip_label_5.config(bd=0, text="- If you would like to remove a component from the final calculation, RIGHT CLICK the relevant component row in the Results page's 'Components Submitted' table and select 'Delete'.\n")
+        tip_label_5.pack(side=tk.TOP)
+
+        tip_label_6 = tk.Label(howtouse_frame, bg='gray20', fg='yellow')
+        tip_label_6.config(bd=0, text="- You may press the column headings of the table at the 'Results' table to sort the information alphabetically or numerically.\n")
+        tip_label_6.pack(side=tk.TOP)
+
+        tip_label_7 = tk.Label(howtouse_frame, bg='gray20', fg='yellow')
+        tip_label_7.config(bd=0, text="- The final cost of the system should update as you add components, however if you want to be double sure that the final value displayed is correct, you may use the 'Calculate' button.\n")
+        tip_label_7.pack(side=tk.TOP)
+
+        tip_label_8 = tk.Label(howtouse_frame, bg='gray20', fg='yellow')
+        tip_label_8.config(bd=0, text="- You may clear the entire database using the 'Clear Database' button. Keep in mind the data stored will be non-retrievable and removed permanently.\n")
+        tip_label_8.pack(side=tk.TOP)
+
 
 class Turbines():
     def __init__(self, master, main_notebook):
@@ -290,10 +330,10 @@ class Turbines():
                         duplicates_count += 1
 
                 if duplicates_count > 0:
-                    confirm_duplicate = ms.askquestion("Overwrite Warning", "One or more of the components you have entered has the same name as another component currently in the database.\n\nIf Yes, this entry will be removed.\nIf No, it will be added along the rest of the components, however it can be removed at a later date using the tools in ther Results Page.\n\nConfirm that this is a duplicate entry.")
-                    if confirm_duplicate == 'yes':
+                    confirm_duplicate = ms.askquestion("Overwrite Warning", "One or more duplicates have been found in the database matching this component name.\n\n Do you still want to add this component?")
+                    if confirm_duplicate == 'no':
                         # Stop the adding of the items to the database
-                        print("yes")
+                        ms.showinfo('Success', 'The duplicates have not been added.')
                     else:
                         # Continue letting the items go
                         # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
@@ -310,17 +350,18 @@ class Turbines():
 
                                 if highest_val is None:
                                     # Write information to database
-                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[i].get(), self.power_var_list[i].get(), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[i].get(), round(self.power_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
                                     db.commit()
                                 else:
                                     # Write information to database
-                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[i].get(), self.power_var_list[i].get(), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[i].get(), round(self.power_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
                                     db.commit()
                         ms.showinfo('Success', 'System Cost Updated.')
                 else:
                     # Continue letting the items go
                     # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
-                    for x in range(len(self.name_var_list)):
+                    for i in range(len(self.name_var_list)):
+                        self.total_turbine_cost = 0
                         # Check if its the Turbine Page to calculate the correct results for the turbine costs.
                         if self.main_notebook.index(self.main_notebook.select()) == 1:
                             self.turbine_cost = (2984.9 * self.power_var_list[i].get() ** 0.5171)
@@ -333,11 +374,11 @@ class Turbines():
 
                             if highest_val is None:
                                 # Write information to database
-                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[i].get(), self.power_var_list[i].get(), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[i].get(), round(self.power_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
                                 db.commit()
                             else:
                                 # Write information to database
-                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[i].get(), self.power_var_list[i].get(), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[i].get(), round(self.power_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.turbine_cost, 2), round(self.total_turbine_cost, 2)))
                                 db.commit()
                     ms.showinfo('Success', 'System Cost Updated.')
 
@@ -358,13 +399,11 @@ class Turbines():
                 for i in range(len(comp_values)):
                     try:
                         r.treeview.insert('', tk.END,
-                                             values=(comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
+                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
                                                      comp_values_fetch[i][5], comp_values_fetch[i][6]))
-                        i += 1
                     except IndexError:
                         # Insert an empty string if this error is caught
-                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', ''))
-                        i += 1
+                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', '', ''))
                     r.treeview.pack(pady=2, padx=2)
 
 
@@ -582,79 +621,146 @@ class HeatExchangers():
                 # Check if the name of the component is equal to any other names in the database.
                 comp_names_db_fetch = c.execute('SELECT name FROM ComponentData').fetchall()
                 comp_names_db = [x[0] for x in comp_names_db_fetch]
-                for x in range(len(comp_names_db)):
-                    try:
-                        if self.name_var_list[x].get() in comp_names_db:
-                            confirm_duplicate = ms.askquestion("Overwrite Warning", "One or more of the components you have entered has the same name as another component currently in the database.\n\nIf Yes, this entry will be removed.\nIf No, it will be added along the rest of the components, however it can be removed at a later date using the tools in ther Results Page.\n\nConfirm that this is a duplicate entry.")
 
-                            if confirm_duplicate == 'yes':
-                                self.name_var_list.pop(i)
-                                self.area_var_list.pop(i)
-                                self.quantity_var_list.pop(i)
-                    except IndexError:
-                        pass
+                duplicates_count = 0
+
                 for x in range(len(self.name_var_list)):
-                    if self.main_notebook.index(self.main_notebook.select()) == 2:
-                        if self.sub_notebook.index(self.sub_notebook.select()) == 0:
-                            # Shell and Tube
-                            self.snt_cost = (627.6 * self.area_var_list[x].get() ** 0.9199)
-                            self.snt_quantity_cost = self.snt_cost * int(self.quantity_var_list[x].get())
-                            self.total_snt_cost += self.snt_quantity_cost
+                    if self.name_var_list[x].get() in comp_names_db:
+                        duplicates_count += 1
 
-                            # Find next highest id
-                            select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
-                            highest_val = [x[0] for x in select_highest_val][0]
+                if duplicates_count > 0:
+                    confirm_duplicate = ms.askquestion('Overwrite Warning', 'One or more duplicates have been found in the database matching this component name.\n\n Do you still want to add this component?')
+                    if confirm_duplicate == 'no':
+                        # Stop the adding of the items to the database
+                        ms.showinfo('Success', 'The duplicates have not been added.')
+                    else:
+                        # Continue letting the items go
+                        # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                        for x in range(len(self.name_var_list)):
+                            if self.main_notebook.index(self.main_notebook.select()) == 2:
+                                if self.sub_notebook.index(self.sub_notebook.select()) == 0:
+                                    # Shell and Tube
+                                    self.snt_cost = (627.6 * self.area_var_list[x].get() ** 0.9199)
+                                    self.snt_quantity_cost = self.snt_cost * int(self.quantity_var_list[x].get())
+                                    self.total_snt_cost += self.snt_quantity_cost
 
-                            if highest_val is None:
-                                # Write information to database
-                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type_snt, self.name_var_list[x].get(), self.area_var_list[x].get(), self.quantity_var_list[x].get(), round(self.snt_cost, 2), round(self.total_snt_cost, 2)))
-                                db.commit()
-                            else:
-                                # Write information to database
-                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type_snt, self.name_var_list[x].get(), self.area_var_list[x].get(), self.quantity_var_list[x].get(), round(self.snt_cost, 2), round(self.total_snt_cost, 2)))
-                                db.commit()
+                                    # Find next highest id
+                                    select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                                    highest_val = [x[0] for x in select_highest_val][0]
 
-                        elif self.sub_notebook.index(self.sub_notebook.select()) == 1:
-                            # Plate
-                            self.plate_cost = (2667.7 * self.area_var_list[x].get() ** 0.3472)
-                            self.plate_quantity_cost = self.plate_cost * int(self.quantity_var_list[x].get())
-                            self.total_plate_cost += self.plate_quantity_cost
+                                    if highest_val is None:
+                                        # Write information to database
+                                        c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type_snt, self.name_var_list[x].get(), round(self.area_var_list[x].get(), 2), self.quantity_var_list[x].get(), round(self.snt_cost, 2), round(self.total_snt_cost, 2)))
+                                        db.commit()
+                                    else:
+                                        # Write information to database
+                                        c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type_snt, self.name_var_list[x].get(), round(self.area_var_list[x].get(), 2), self.quantity_var_list[x].get(), round(self.snt_cost, 2), round(self.total_snt_cost, 2)))
+                                        db.commit()
 
-                            select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
-                            highest_val = [x[0] for x in select_highest_val][0]
+                                elif self.sub_notebook.index(self.sub_notebook.select()) == 1:
+                                    # Plate
+                                    self.plate_cost = (2667.7 * self.area_var_list[x].get() ** 0.3472)
+                                    self.plate_quantity_cost = self.plate_cost * int(self.quantity_var_list[x].get())
+                                    self.total_plate_cost += self.plate_quantity_cost
 
-                            if highest_val is None:
-                                # Write information to database
-                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type_plate, self.name_var_list[x].get(), self.area_var_list[x].get(), self.quantity_var_list[x].get(), round(self.plate_cost, 2), round(self.total_plate_cost, 2)))
-                                db.commit()
-                            else:
-                                # Write information to database
-                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type_plate, self.name_var_list[x].get(), self.area_var_list[x].get(), self.quantity_var_list[x].get(), round(self.plate_cost, 2), round(self.total_plate_cost, 2)))
-                                db.commit()
+                                    select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                                    highest_val = [x[0] for x in select_highest_val][0]
 
-                        elif self.sub_notebook.index(self.sub_notebook.select()) == 2:
-                            # Air-Cooled Condenser
-                            self.acc_cost = (1706.2 * self.area_var_list[x].get() ** 0.4301)
-                            self.acc_quantity_cost = self.acc_cost * int(self.quantity_var_list[x].get())
-                            self.total_acc_cost += self.acc_quantity_cost
+                                    if highest_val is None:
+                                        # Write information to database
+                                        c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type_plate, self.name_var_list[x].get(), round(self.area_var_list[x].get(), 2), self.quantity_var_list[x].get(), round(self.plate_cost, 2), round(self.total_plate_cost, 2)))
+                                        db.commit()
+                                    else:
+                                        # Write information to database
+                                        c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type_plate, self.name_var_list[x].get(), round(self.area_var_list[x].get(), 2), self.quantity_var_list[x].get(), round(self.plate_cost, 2), round(self.total_plate_cost, 2)))
+                                        db.commit()
 
-                            select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
-                            highest_val = [x[0] for x in select_highest_val][0]
+                                elif self.sub_notebook.index(self.sub_notebook.select()) == 2:
+                                    # Air-Cooled Condenser
+                                    self.acc_cost = (1706.2 * self.area_var_list[x].get() ** 0.4301)
+                                    self.acc_quantity_cost = self.acc_cost * int(self.quantity_var_list[x].get())
+                                    self.total_acc_cost += self.acc_quantity_cost
 
-                            if highest_val is None:
-                                # Write information to database
-                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type_acc, self.name_var_list[x].get(), self.area_var_list[x].get(), self.quantity_var_list[x].get(), round(self.acc_cost, 2), round(self.total_acc_cost, 2)))
-                                db.commit()
-                            else:
-                                # Write information to database
-                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type_acc, self.name_var_list[x].get(), self.area_var_list[x].get(), self.quantity_var_list[x].get(), round(self.acc_cost, 2), round(self.total_acc_cost, 2)))
-                                db.commit()
-                ms.showinfo('Success', 'System Cost Updated.')
+                                    select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                                    highest_val = [x[0] for x in select_highest_val][0]
+
+                                    if highest_val is None:
+                                        # Write information to database
+                                        c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type_acc, self.name_var_list[x].get(), round(self.area_var_list[x].get(), 2), self.quantity_var_list[x].get(), round(self.acc_cost, 2), round(self.total_acc_cost, 2)))
+                                        db.commit()
+                                    else:
+                                        # Write information to database
+                                        c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type_acc, self.name_var_list[x].get(), round(self.area_var_list[x].get(), 2), self.quantity_var_list[x].get(), round(self.acc_cost, 2), round(self.total_acc_cost, 2)))
+                                        db.commit()
+                        ms.showinfo('Success', 'System Cost Updated.')
+                else:
+                    # Continue letting the items go
+                    # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                    for x in range(len(self.name_var_list)):
+                        if self.main_notebook.index(self.main_notebook.select()) == 2:
+                            if self.sub_notebook.index(self.sub_notebook.select()) == 0:
+                                # Shell and Tube
+                                self.snt_cost = (627.6 * self.area_var_list[x].get() ** 0.9199)
+                                self.snt_quantity_cost = self.snt_cost * int(self.quantity_var_list[x].get())
+                                self.total_snt_cost += self.snt_quantity_cost
+
+                                # Find next highest id
+                                select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                                highest_val = [x[0] for x in select_highest_val][0]
+
+                                if highest_val is None:
+                                    # Write information to database
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type_snt, self.name_var_list[x].get(), round(self.area_var_list[x].get(), 2), self.quantity_var_list[x].get(), round(self.snt_cost, 2), round(self.total_snt_cost, 2)))
+                                    db.commit()
+                                else:
+                                    # Write information to database
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type_snt, self.name_var_list[x].get(), round(self.area_var_list[x].get(), 2), self.quantity_var_list[x].get(), round(self.snt_cost, 2), round(self.total_snt_cost, 2)))
+                                    db.commit()
+
+                            elif self.sub_notebook.index(self.sub_notebook.select()) == 1:
+                                # Plate
+                                self.plate_cost = (2667.7 * self.area_var_list[x].get() ** 0.3472)
+                                self.plate_quantity_cost = self.plate_cost * int(self.quantity_var_list[x].get())
+                                self.total_plate_cost += self.plate_quantity_cost
+
+                                select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                                highest_val = [x[0] for x in select_highest_val][0]
+
+                                if highest_val is None:
+                                    # Write information to database
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type_plate, self.name_var_list[x].get(), round(self.area_var_list[x].get(), 2), self.quantity_var_list[x].get(), round(self.plate_cost, 2), round(self.total_plate_cost, 2)))
+                                    db.commit()
+                                else:
+                                    # Write information to database
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type_plate, self.name_var_list[x].get(), round(self.area_var_list[x].get(), 2), self.quantity_var_list[x].get(), round(self.plate_cost, 2), round(self.total_plate_cost, 2)))
+                                    db.commit()
+
+                            elif self.sub_notebook.index(self.sub_notebook.select()) == 2:
+                                # Air-Cooled Condenser
+                                self.acc_cost = (1706.2 * self.area_var_list[x].get() ** 0.4301)
+                                self.acc_quantity_cost = self.acc_cost * int(self.quantity_var_list[x].get())
+                                self.total_acc_cost += self.acc_quantity_cost
+
+                                select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                                highest_val = [x[0] for x in select_highest_val][0]
+
+                                if highest_val is None:
+                                    # Write information to database
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type_acc, self.name_var_list[x].get(), round(self.area_var_list[x].get(), 2), self.quantity_var_list[x].get(), round(self.acc_cost, 2), round(self.total_acc_cost, 2)))
+                                    db.commit()
+                                else:
+                                    # Write information to database
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type_acc, self.name_var_list[x].get(), round(self.area_var_list[x].get(), 2), self.quantity_var_list[x].get(), round(self.acc_cost, 2), round(self.total_acc_cost, 2)))
+                                    db.commit()
+                    ms.showinfo('Success', 'System Cost Updated.')
 
                 # Update Results table once this has gone through.
                 # Get values from database
                 comp_values_fetch = c.execute('SELECT * FROM ComponentData').fetchall()
                 comp_values = [x[0] for x in comp_values_fetch]
+
+                # Delete the current results page and recreate it.
+                self.main_notebook.forget(6)
 
                 r = Results(self.master, self.main_notebook)
                 # Clear the table and re-populate it.
@@ -665,13 +771,11 @@ class HeatExchangers():
                 for i in range(len(comp_values)):
                     try:
                         r.treeview.insert('', tk.END,
-                                             values=(comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
+                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
                                                      comp_values_fetch[i][5], comp_values_fetch[i][6]))
-                        i += 1
                     except IndexError:
                         # Insert an empty string if this error is caught
-                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', ''))
-                        i += 1
+                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', '', ''))
                     r.treeview.pack(pady=2, padx=2)
 
 
@@ -779,44 +883,73 @@ class Pumps():
                 # Check if the name of the component is equal to any other names in the database.
                 comp_names_db_fetch = c.execute('SELECT name FROM ComponentData').fetchall()
                 comp_names_db = [x[0] for x in comp_names_db_fetch]
-                for x in range(len(comp_names_db)):
-                    try:
-                        if self.name_var_list[x].get() in comp_names_db:
-                            confirm_duplicate = ms.askquestion("Overwrite Warning", "One or more of the components you have entered has the same name as another component currently in the database.\n\nIf Yes, this entry will be removed.\nIf No, it will be added along the rest of the components, however it can be removed at a later date using the tools in ther Results Page.\n\nConfirm that this is a duplicate entry.")
 
-                            if confirm_duplicate == 'yes':
-                                self.name_var_list.pop(x)
-                                self.power_var_list.pop(x)
-                                self.quantity_var_list.pop(x)
-                    except IndexError:
-                        pass
-                # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                duplicates_count = 0
+
                 for x in range(len(self.name_var_list)):
-                    # Check if its the Turbine Page to calculate the correct results for the turbine costs.
-                    if self.main_notebook.index(self.main_notebook.select()) == 3:
-                        self.pump_cost = (1513.4 * self.power_var_list[x].get() ** 0.1946)
-                        self.pump_quantity_cost = self.pump_cost * int(self.quantity_var_list[x].get())
-                        self.total_pump_cost += self.pump_quantity_cost
+                    if self.name_var_list[x].get() in comp_names_db:
+                        duplicates_count += 1
 
-                        # Find next highest id
-                        select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
-                        highest_val = [x[0] for x in select_highest_val][0]
+                if duplicates_count > 0:
+                    confirm_duplicate = ms.askquestion("Overwrite Warning", "One or more duplicates have been found in the database matching this component name.\n\n Do you still want to add this component?")
+                    if confirm_duplicate == 'no':
+                        # Stop the adding of the items to the database
+                        ms.showinfo('Success', 'The duplicates have not been added.')
+                    else:
+                        # Continue letting the items go
+                        # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                        for x in range(len(self.name_var_list)):
+                            # Check if its the Turbine Page to calculate the correct results for the turbine costs.
+                            if self.main_notebook.index(self.main_notebook.select()) == 1:
+                                self.pump_cost = (2984.9 * self.power_var_list[i].get() ** 0.5171)
+                                self.pump_quantity_cost = self.pump_cost * int(self.quantity_var_list[i].get())
+                                self.total_pump_cost += self.pump_quantity_cost
 
-                        if highest_val is None:
-                            # Write information to database
-                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[x].get(), self.power_var_list[x].get(), self.quantity_var_list[x].get(), round(self.pump_cost, 2), round(self.total_pump_cost, 2)))
-                            db.commit()
-                        else:
-                            # Write information to database
-                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[x].get(), self.power_var_list[x].get(), self.quantity_var_list[x].get(), round(self.pump_cost, 2), round(self.total_pump_cost, 2)))
-                            db.commit()
+                                # Find next highest id
+                                select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                                highest_val = [x[0] for x in select_highest_val][0]
 
-                ms.showinfo('Success', 'System Cost Updated.')
+                                if highest_val is None:
+                                    # Write information to database
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[i].get(), round(self.power_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.pump_cost, 2), round(self.total_pump_cost, 2)))
+                                    db.commit()
+                                else:
+                                    # Write information to database
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[i].get(), round(self.power_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.pump_cost, 2), round(self.total_pump_cost, 2)))
+                                    db.commit()
+                        ms.showinfo('Success', 'System Cost Updated.')
+                else:
+                    # Continue letting the items go
+                    # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                    for i in range(len(self.name_var_list)):
+                        self.total_pump_cost = 0
+                        # Check if its the Turbine Page to calculate the correct results for the pump costs.
+                        if self.main_notebook.index(self.main_notebook.select()) == 1:
+                            self.pump_cost = (2984.9 * self.power_var_list[i].get() ** 0.5171)
+                            self.pump_quantity_cost = self.pump_cost * int(self.quantity_var_list[i].get())
+                            self.total_pump_cost += self.pump_quantity_cost
+
+                            # Find next highest id
+                            select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                            highest_val = [x[0] for x in select_highest_val][0]
+
+                            if highest_val is None:
+                                # Write information to database
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[i].get(), round(self.power_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.pump_cost, 2), round(self.total_pump_cost, 2)))
+                                db.commit()
+                            else:
+                                # Write information to database
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[i].get(), round(self.power_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.pump_cost, 2), round(self.total_pump_cost, 2)))
+                                db.commit()
+                    ms.showinfo('Success', 'System Cost Updated.')
 
                 # Update Results table once this has gone through.
                 # Get values from database
                 comp_values_fetch = c.execute('SELECT * FROM ComponentData').fetchall()
                 comp_values = [x[0] for x in comp_values_fetch]
+
+                # Delete the current results page and recreate it.
+                self.main_notebook.forget(6)
 
                 r = Results(self.master, self.main_notebook)
                 # Clear the table and re-populate it.
@@ -827,13 +960,11 @@ class Pumps():
                 for i in range(len(comp_values)):
                     try:
                         r.treeview.insert('', tk.END,
-                                             values=(comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
+                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
                                                      comp_values_fetch[i][5], comp_values_fetch[i][6]))
-                        i += 1
                     except IndexError:
                         # Insert an empty string if this error is caught
-                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', ''))
-                        i += 1
+                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', '', ''))
                     r.treeview.pack(pady=2, padx=2)
 
 
@@ -941,44 +1072,73 @@ class Expanders():
                 # Check if the name of the component is equal to any other names in the database.
                 comp_names_db_fetch = c.execute('SELECT name FROM ComponentData').fetchall()
                 comp_names_db = [x[0] for x in comp_names_db_fetch]
-                for x in range(len(comp_names_db)):
-                    try:
-                        if self.name_var_list[x].get() in comp_names_db:
-                            confirm_duplicate = ms.askquestion("Overwrite Warning", "One or more of the components you have entered has the same name as another component currently in the database.\n\nIf Yes, this entry will be removed.\nIf No, it will be added along the rest of the components, however it can be removed at a later date using the tools in ther Results Page.\n\nConfirm that this is a duplicate entry.")
 
-                            if confirm_duplicate == 'yes':
-                                self.name_var_list.pop(x)
-                                self.power_var_list.pop(x)
-                                self.quantity_var_list.pop(x)
-                    except IndexError:
-                        pass
-                # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                duplicates_count = 0
+
                 for x in range(len(self.name_var_list)):
-                    # Check if its the Turbine Page to calculate the correct results for the turbine costs.
-                    if self.main_notebook.index(self.main_notebook.select()) == 4:
-                        self.expander_cost = (544 * self.power_var_list[x].get() ** 0.8331)
-                        self.expander_quantity_cost = self.expander_cost * int(self.quantity_var_list[x].get())
-                        self.total_expander_cost += self.expander_quantity_cost
+                    if self.name_var_list[x].get() in comp_names_db:
+                        duplicates_count += 1
 
-                        # Find next highest id
-                        select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
-                        highest_val = [x[0] for x in select_highest_val][0]
+                if duplicates_count > 0:
+                    confirm_duplicate = ms.askquestion("Overwrite Warning", "One or more duplicates have been found in the database matching this component name.\n\n Do you still want to add this component?")
+                    if confirm_duplicate == 'no':
+                        # Stop the adding of the items to the database
+                        ms.showinfo('Success', 'The duplicates have not been added.')
+                    else:
+                        # Continue letting the items go
+                        # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                        for x in range(len(self.name_var_list)):
+                            # Check if its the Turbine Page to calculate the correct results for the turbine costs.
+                            if self.main_notebook.index(self.main_notebook.select()) == 1:
+                                self.expander_cost = (2984.9 * self.power_var_list[i].get() ** 0.5171)
+                                self.expander_quantity_cost = self.expander_cost * int(self.quantity_var_list[i].get())
+                                self.total_expander_cost += self.expander_quantity_cost
 
-                        if highest_val is None:
-                            # Write information to database
-                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[x].get(), self.power_var_list[x].get(), self.quantity_var_list[x].get(), round(self.expander_cost, 2), round(self.total_expander_cost, 2)))
-                            db.commit()
-                        else:
-                            # Write information to database
-                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[x].get(), self.power_var_list[x].get(), self.quantity_var_list[x].get(), round(self.expander_cost, 2), round(self.total_expander_cost, 2)))
-                            db.commit()
+                                # Find next highest id
+                                select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                                highest_val = [x[0] for x in select_highest_val][0]
 
-                ms.showinfo('Success', 'System Cost Updated.')
+                                if highest_val is None:
+                                    # Write information to database
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[i].get(), round(self.power_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.expander_cost, 2), round(self.total_expander_cost, 2)))
+                                    db.commit()
+                                else:
+                                    # Write information to database
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[i].get(), round(self.power_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.expander_cost, 2), round(self.total_expander_cost, 2)))
+                                    db.commit()
+                        ms.showinfo('Success', 'System Cost Updated.')
+                else:
+                    # Continue letting the items go
+                    # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                    for i in range(len(self.name_var_list)):
+                        self.total_expander_cost = 0
+                        # Check if its the Turbine Page to calculate the correct results for the expander costs.
+                        if self.main_notebook.index(self.main_notebook.select()) == 1:
+                            self.expander_cost = (2984.9 * self.power_var_list[i].get() ** 0.5171)
+                            self.expander_quantity_cost = self.expander_cost * int(self.quantity_var_list[i].get())
+                            self.total_expander_cost += self.expander_quantity_cost
+
+                            # Find next highest id
+                            select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                            highest_val = [x[0] for x in select_highest_val][0]
+
+                            if highest_val is None:
+                                # Write information to database
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[i].get(), round(self.power_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.expander_cost, 2), round(self.total_expander_cost, 2)))
+                                db.commit()
+                            else:
+                                # Write information to database
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[i].get(), round(self.power_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.expander_cost, 2), round(self.total_expander_cost, 2)))
+                                db.commit()
+                    ms.showinfo('Success', 'System Cost Updated.')
 
                 # Update Results table once this has gone through.
                 # Get values from database
                 comp_values_fetch = c.execute('SELECT * FROM ComponentData').fetchall()
                 comp_values = [x[0] for x in comp_values_fetch]
+
+                # Delete the current results page and recreate it.
+                self.main_notebook.forget(6)
 
                 r = Results(self.master, self.main_notebook)
                 # Clear the table and re-populate it.
@@ -989,13 +1149,11 @@ class Expanders():
                 for i in range(len(comp_values)):
                     try:
                         r.treeview.insert('', tk.END,
-                                             values=(comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
+                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
                                                      comp_values_fetch[i][5], comp_values_fetch[i][6]))
-                        i += 1
                     except IndexError:
                         # Insert an empty string if this error is caught
-                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', ''))
-                        i += 1
+                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', '', ''))
                     r.treeview.pack(pady=2, padx=2)
 
 
@@ -1102,43 +1260,73 @@ class StorageTanks():
                 # Check if the name of the component is equal to any other names in the database.
                 comp_names_db_fetch = c.execute('SELECT name FROM ComponentData').fetchall()
                 comp_names_db = [x[0] for x in comp_names_db_fetch]
-                for x in range(len(comp_names_db)):
-                    try:
-                        if self.name_var_list[x].get() in comp_names_db:
-                            confirm_duplicate = ms.askquestion("Overwrite Warning", "One or more of the components you have entered has the same name as another component currently in the database.\n\nIf Yes, this entry will be removed.\nIf No, it will be added along the rest of the components, however it can be removed at a later date using the tools in ther Results Page.\n\nConfirm that this is a duplicate entry.")
 
-                            if confirm_duplicate == 'yes':
-                                self.name_var_list.pop(i)
-                                self.volume_var_list.pop(i)
-                                self.quantity_var_list.pop(i)
-                    except IndexError:
-                        pass
-                # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                duplicates_count = 0
+
                 for x in range(len(self.name_var_list)):
-                    # Check if its the Turbine Page to calculate the correct results for the turbine costs.
-                    if self.main_notebook.index(self.main_notebook.select()) == 5:
-                        self.st_cost = (52.6 * self.volume_var_list[x].get() ** 0.5531)
-                        self.st_quantity_cost = self.st_cost * int(self.quantity_var_list[x].get())
-                        self.total_st_cost += self.st_quantity_cost
+                    if self.name_var_list[x].get() in comp_names_db:
+                        duplicates_count += 1
 
-                        # Find next highest id
-                        select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
-                        highest_val = [x[0] for x in select_highest_val][0]
+                if duplicates_count > 0:
+                    confirm_duplicate = ms.askquestion("Overwrite Warning", "One or more duplicates have been found in the database matching this component name.\n\n Do you still want to add this component?")
+                    if confirm_duplicate == 'no':
+                        # Stop the adding of the items to the database
+                        ms.showinfo('Success', 'The duplicates have not been added.')
+                    else:
+                        # Continue letting the items go
+                        # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                        for x in range(len(self.name_var_list)):
+                            # Check if its the Turbine Page to calculate the correct results for the turbine costs.
+                            if self.main_notebook.index(self.main_notebook.select()) == 1:
+                                self.st_cost = (2984.9 * self.volume_var_list[i].get() ** 0.5171)
+                                self.st_quantity_cost = self.st_cost * int(self.quantity_var_list[i].get())
+                                self.total_st_cost += self.st_quantity_cost
 
-                        if highest_val is None:
-                            # Write information to database
-                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[x].get(), self.volume_var_list[x].get(), self.quantity_var_list[x].get(), round(self.st_cost, 2), round(self.total_st_cost, 2)))
-                            db.commit()
-                        else:
-                            # Write information to database
-                            c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[x].get(), self.volume_var_list[x].get(), self.quantity_var_list[x].get(), round(self.st_cost, 2), round(self.total_st_cost, 2)))
-                            db.commit()
+                                # Find next highest id
+                                select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                                highest_val = [x[0] for x in select_highest_val][0]
 
-                ms.showinfo('Success', 'System Cost Updated.')
+                                if highest_val is None:
+                                    # Write information to database
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[i].get(), round(self.volume_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.st_cost, 2), round(self.total_st_cost, 2)))
+                                    db.commit()
+                                else:
+                                    # Write information to database
+                                    c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[i].get(), round(self.volume_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.st_cost, 2), round(self.total_st_cost, 2)))
+                                    db.commit()
+                        ms.showinfo('Success', 'System Cost Updated.')
+                else:
+                    # Continue letting the items go
+                    # Another for loop to enter into the database, ONLY IF ALL THE ENTRY FIELDS ARE VALID.
+                    for i in range(len(self.name_var_list)):
+                        self.total_st_cost = 0
+                        # Check if its the Turbine Page to calculate the correct results for the st costs.
+                        if self.main_notebook.index(self.main_notebook.select()) == 1:
+                            self.st_cost = (2984.9 * self.volume_var_list[i].get() ** 0.5171)
+                            self.st_quantity_cost = self.st_cost * int(self.quantity_var_list[i].get())
+                            self.total_st_cost += self.st_quantity_cost
 
+                            # Find next highest id
+                            select_highest_val = c.execute('SELECT MAX(id)+1 FROM ComponentData').fetchall()
+                            highest_val = [x[0] for x in select_highest_val][0]
+
+                            if highest_val is None:
+                                # Write information to database
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(1,?,?,?,?,?,?)', (_type, self.name_var_list[i].get(), round(self.volume_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.st_cost, 2), round(self.total_st_cost, 2)))
+                                db.commit()
+                            else:
+                                # Write information to database
+                                c.execute('INSERT INTO ComponentData(id, type, name, metric, quantity, individual_cost, total_cost) VALUES(?,?,?,?,?,?,?)', (highest_val, _type, self.name_var_list[i].get(), round(self.volume_var_list[i].get(), 2), self.quantity_var_list[i].get(), round(self.st_cost, 2), round(self.total_st_cost, 2)))
+                                db.commit()
+                    ms.showinfo('Success', 'System Cost Updated.')
+
+                # Update Results table once this has gone through.
                 # Get values from database
                 comp_values_fetch = c.execute('SELECT * FROM ComponentData').fetchall()
                 comp_values = [x[0] for x in comp_values_fetch]
+
+                # Delete the current results page and recreate it.
+                self.main_notebook.forget(6)
 
                 r = Results(self.master, self.main_notebook)
                 # Clear the table and re-populate it.
@@ -1149,13 +1337,11 @@ class StorageTanks():
                 for i in range(len(comp_values)):
                     try:
                         r.treeview.insert('', tk.END,
-                                             values=(comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
+                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
                                                      comp_values_fetch[i][5], comp_values_fetch[i][6]))
-                        i += 1
                     except IndexError:
                         # Insert an empty string if this error is caught
-                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', ''))
-                        i += 1
+                        r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', '', ''))
                     r.treeview.pack(pady=2, padx=2)
 
 
@@ -1175,15 +1361,16 @@ class Results():
         treeview_label.pack(side=tk.TOP, padx=10, pady=10)
 
         # Create the columns necessary to display the database in the GUI as a table.
-        self.columns = ('Type', 'Name', 'Area/Power/Volume', 'Quantity', 'Individual Cost', 'Quantity x Individual Cost')
+        self.columns = ('ID', 'Type', 'Name', 'Area/Power/Volume', 'Quantity', 'Individual Cost', 'Quantity x Individual Cost')
         self.treeview = ttk.Treeview(treeview_frame, columns=self.columns, show='headings')
         # Makes the column titles
-        self.treeview.column('Type', width=250)
-        self.treeview.column('Name', width=100)
-        self.treeview.column('Area/Power/Volume', width=200)
-        self.treeview.column('Quantity', width=100)
-        self.treeview.column('Individual Cost', width=100)
-        self.treeview.column('Quantity x Individual Cost', width=250)
+        self.treeview.column('ID', anchor=tk.CENTER, width=50)
+        self.treeview.column('Type', anchor=tk.CENTER, width=250)
+        self.treeview.column('Name', anchor=tk.CENTER, width=100)
+        self.treeview.column('Area/Power/Volume', anchor=tk.CENTER, width=200)
+        self.treeview.column('Quantity', anchor=tk.CENTER, width=100)
+        self.treeview.column('Individual Cost', anchor=tk.CENTER, width=100)
+        self.treeview.column('Quantity x Individual Cost', anchor=tk.CENTER, width=250)
 
         # Fetch values from database
         comp_values_fetch = c.execute('SELECT * FROM ComponentData').fetchall()
@@ -1192,13 +1379,11 @@ class Results():
         for i in range(len(comp_values)):
             try:
                 self.treeview.insert('', tk.END,
-                                     values=(comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
+                                     values=(comp_values_fetch[i][0], comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
                                              comp_values_fetch[i][5], comp_values_fetch[i][6]))
-                i += 1
             except IndexError:
                 # Insert an empty string if this error is caught
-                self.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', ''))
-                i += 1
+                self.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', '', ''))
             self.treeview.pack(pady=2, padx=2)
         # For every column in the columns list, make the column able to be
         # sorted alphabetically or numerically by calling the
@@ -1208,6 +1393,14 @@ class Results():
             self.treeview.heading(col, text=col,
                                   command=lambda c=col: self.treeview_sort_column(self.treeview, c, False))
 
+        # Right Click Context Menu
+        self.popup_menu = tk.Menu(treeview_frame, tearoff = 0)
+        self.popup_menu.add_command(label="Delete", command=self.delete_selected)
+
+        self.treeview.bind('<Button-3>', self.popup)
+        self.treeview.bind('<1>',  self.edit_cell)
+
+        # Results actions frame
         results_frame = tk.Frame(results_page)
         results_frame.pack(expand=True, fill=tk.X)
 
@@ -1243,11 +1436,342 @@ class Results():
 
         # Clear Database button
         clear_db_btn = tk.Button(results_frame)
-        clear_db_btn.config(relief=tk.RAISED, bd=5, text='    Clear Database    ',
+        clear_db_btn.config(relief=tk.RAISED, bd=5, text='   Clear Database   ',
                                  command=self.clear_database)
         clear_db_btn.pack(side=tk.BOTTOM, anchor=tk.S, pady=15, padx=15)
 
         # HELP PAGE
+
+    def popup(self, event):
+        try:
+            self.popup_menu.tk_popup(event.x_root, event.y_root, 0)
+        finally:
+            self.popup_menu.grab_release()
+
+    def edit_cell(self, event):
+        # Get the rows that were selected
+        if self.treeview.identify_region(event.x, event.y) == 'cell':
+            # the user clicked on a cell
+
+            def ok(event):
+                if str(column) == '#4':
+                    try:
+                        float_entry = float(entry.get())
+                        if float_entry == 0.0 or float_entry == 0 or float_entry == '':
+                            ms.showerror('Invalid', 'Invalid Area/Power/Volume Input.')
+                        else:
+                            self.treeview.set(item, column, entry.get())
+                            entry.destroy()
+
+                            row_id = self.treeview.item(item)['values'][0]
+                            row_type = self.treeview.item(item)['values'][1]
+                            row_name = self.treeview.item(item)['values'][2]
+                            row_metric = float(self.treeview.item(item)['values'][3])
+                            row_quantity = int(self.treeview.item(item)['values'][4])
+
+                            # Establish total cost values
+                            self.total_turbine_cost = 0
+                            self.total_snt_cost = 0
+                            self.total_plate_cost = 0
+                            self.total_acc_cost = 0
+                            self.total_pump_cost = 0
+                            self.total_expander_cost = 0
+                            self.total_st_cost = 0
+
+                            # Calculate the changes to the costs
+                            self.total_turbine_cost = 0
+                            # Determine which component type the row hosts.
+                            if row_type == 'Turbine':
+                                self.turbine_cost = (2984.9 * row_metric ** 0.5171)
+                                self.turbine_quantity_cost = self.turbine_cost * row_quantity
+                                self.total_turbine_cost += self.turbine_quantity_cost
+
+                                # Set them to a general variable to be used.
+                                comp_individual_cost = round(self.turbine_cost, 2)
+                                comp_total_cost = round(self.total_turbine_cost, 2)
+
+                                self.treeview.set(item, '#6', comp_individual_cost)
+                                self.treeview.set(item, '#7', comp_total_cost)
+
+                            elif row_type == 'Shell and Tube':
+                                self.snt_cost = (627.9 * row_metric ** 0.9199)
+                                self.snt_quantity_cost = self.snt_cost * row_quantity
+                                self.total_snt_cost += self.snt_quantity_cost
+
+                                # Set them to a general variable to be used.
+                                comp_individual_cost = round(self.snt_cost, 2)
+                                comp_total_cost = round(self.total_snt_cost, 2)
+
+                                self.treeview.set(item, '#6', comp_individual_cost)
+                                self.treeview.set(item, '#7', comp_total_cost)
+
+                            elif row_type == 'Plate':
+                                self.plate_cost = (2667.7 * row_metric ** 0.3472)
+                                self.plate_quantity_cost = self.plate_cost * row_quantity
+                                self.total_plate_cost += self.plate_quantity_cost
+
+                                # Set them to a general variable to be used.
+                                comp_individual_cost = round(self.plate_cost, 2)
+                                comp_total_cost = round(self.total_plate_cost, 2)
+
+                                self.treeview.set(item, '#6', comp_individual_cost)
+                                self.treeview.set(item, '#7', comp_total_cost)
+
+                            elif row_type == 'Air-Cooled Condenser':
+                                self.acc_cost = (1706.2 * row_metric ** 0.4301)
+                                self.acc_quantity_cost = self.acc_cost * row_quantity
+                                self.total_acc_cost += self.acc_quantity_cost
+
+                                # Set them to a general variable to be used.
+                                comp_individual_cost = round(self.acc_cost, 2)
+                                comp_total_cost = round(self.total_acc_cost, 2)
+
+                                self.treeview.set(item, '#6', comp_individual_cost)
+                                self.treeview.set(item, '#7', comp_total_cost)
+
+                            elif row_type == 'Pump':
+                                self.pump_cost = (1513.4 * row_metric ** 0.1946)
+                                self.pump_quantity_cost = self.pump_cost * row_quantity
+                                self.total_pump_cost += self.pump_quantity_cost
+
+                                # Set them to a general variable to be used.
+                                comp_individual_cost = round(self.pump_cost, 2)
+                                comp_total_cost = round(self.total_pump_cost, 2)
+
+                                self.treeview.set(item, '#6', comp_individual_cost)
+                                self.treeview.set(item, '#7', comp_total_cost)
+
+                            elif row_type == 'Expander':
+                                self.expander_cost = (544 * row_metric ** 0.8331)
+                                self.expander_quantity_cost = self.expander_cost * row_quantity
+                                self.total_expander_cost += self.expander_quantity_cost
+
+                                # Set them to a general variable to be used.
+                                comp_individual_cost = round(self.expander_cost, 2)
+                                comp_total_cost = round(self.total_expander_cost, 2)
+
+                                self.treeview.set(item, '#6', comp_individual_cost)
+                                self.treeview.set(item, '#7', comp_total_cost)
+
+                            elif row_type == 'Storage Tank':
+                                self.st_cost = (52.6 * row_metric ** 0.5531)
+                                self.st_quantity_cost = self.st_cost * row_quantity
+                                self.total_st_cost += self.st_quantity_cost
+
+                                # Set them to a general variable to be used.
+                                comp_individual_cost = round(self.st_cost, 2)
+                                comp_total_cost = round(self.total_st_cost, 2)
+
+                                self.treeview.set(item, '#6', comp_individual_cost)
+                                self.treeview.set(item, '#7', comp_total_cost)
+
+                            # Change the values in the database on the correct row.
+                            c.execute('UPDATE ComponentData SET name=?, metric=?, quantity=?, individual_cost=?, total_cost=? WHERE id=?', (row_name, row_metric, row_quantity, comp_individual_cost, comp_total_cost, row_id,))
+                            db.commit()
+
+                            total_system_cost = 0
+                            total_quantity = 0
+
+                            comp_values_quantity_fetch = c.execute('SELECT quantity FROM ComponentData').fetchall()
+                            comp_values_quantity = [x[0] for x in comp_values_quantity_fetch]
+                            for quantity in comp_values_quantity:
+                                total_quantity += quantity
+
+                            comp_values_individual_costs_fetch = c.execute('SELECT total_cost FROM ComponentData').fetchall()
+                            comp_values_individual_costs = [x[0] for x in comp_values_individual_costs_fetch]
+                            for individual_cost in comp_values_individual_costs:
+                                total_system_cost += individual_cost
+
+                            self.results_label["text"] = 'Total System Cost: £%.2f' % round(total_system_cost, 2)
+                            self.results_quantity_total_label["text"] = 'Across %d Components' % total_quantity
+                            ms.showinfo('Updated', 'Cost has been updated to £{total_system_cost}\nAcross {total_quantity} Components'.format(total_system_cost=round(total_system_cost, 2), total_quantity=total_quantity))
+
+                    except ValueError:
+                        ms.showerror('Invalid', 'Invalid Area/Power/Volume Input.')
+
+                elif str(column) == '#5':
+                    try:
+                        int_entry = int(entry.get())
+                        if int_entry == 0 or int_entry == '':
+                            ms.showerror('Invalid', 'Invalid Quantity Input.')
+                        else:
+                            self.treeview.set(item, column, entry.get())
+                            entry.destroy()
+
+                            row_id = self.treeview.item(item)['values'][0]
+                            row_type = self.treeview.item(item)['values'][1]
+                            row_name = self.treeview.item(item)['values'][2]
+                            row_metric = float(self.treeview.item(item)['values'][3])
+                            row_quantity = int(self.treeview.item(item)['values'][4])
+
+                            # Establish total cost values
+                            self.total_turbine_cost = 0
+                            self.total_snt_cost = 0
+                            self.total_plate_cost = 0
+                            self.total_acc_cost = 0
+                            self.total_pump_cost = 0
+                            self.total_expander_cost = 0
+                            self.total_st_cost = 0
+
+                            # Calculate the changes to the costs
+                            # Determine which component type the row hosts.
+                            if row_type == 'Turbine':
+                                self.turbine_cost = (2984.9 * row_metric ** 0.5171)
+                                self.turbine_quantity_cost = self.turbine_cost * row_quantity
+                                self.total_turbine_cost += self.turbine_quantity_cost
+
+                                # Set them to a general variable to be used.
+                                comp_individual_cost = round(self.turbine_cost, 2)
+                                comp_total_cost = round(self.total_turbine_cost, 2)
+
+                                self.treeview.set(item, '#6', comp_individual_cost)
+                                self.treeview.set(item, '#7', comp_total_cost)
+
+                            elif row_type == 'Shell and Tube':
+                                self.snt_cost = (627.9 * row_metric ** 0.9199)
+                                self.snt_quantity_cost = self.snt_cost * row_quantity
+                                self.total_snt_cost += self.snt_quantity_cost
+
+                                # Set them to a general variable to be used.
+                                comp_individual_cost = round(self.snt_cost, 2)
+                                comp_total_cost = round(self.total_snt_cost, 2)
+
+                                self.treeview.set(item, '#6', comp_individual_cost)
+                                self.treeview.set(item, '#7', comp_total_cost)
+
+                            elif row_type == 'Plate':
+                                self.plate_cost = (2667.7 * row_metric ** 0.3472)
+                                self.plate_quantity_cost = self.plate_cost * row_quantity
+                                self.total_plate_cost += self.plate_quantity_cost
+
+                                # Set them to a general variable to be used.
+                                comp_individual_cost = round(self.plate_cost, 2)
+                                comp_total_cost = round(self.total_plate_cost, 2)
+
+                                self.treeview.set(item, '#6', comp_individual_cost)
+                                self.treeview.set(item, '#7', comp_total_cost)
+
+                            elif row_type == 'Air-Cooled Condenser':
+                                self.acc_cost = (1706.2 * row_metric ** 0.4301)
+                                self.acc_quantity_cost = self.acc_cost * row_quantity
+                                self.total_acc_cost += self.acc_quantity_cost
+
+                                # Set them to a general variable to be used.
+                                comp_individual_cost = round(self.acc_cost, 2)
+                                comp_total_cost = round(self.total_acc_cost, 2)
+
+                                self.treeview.set(item, '#6', comp_individual_cost)
+                                self.treeview.set(item, '#7', comp_total_cost)
+
+                            elif row_type == 'Pump':
+                                self.pump_cost = (1513.4 * row_metric ** 0.1946)
+                                self.pump_quantity_cost = self.pump_cost * row_quantity
+                                self.total_pump_cost += self.pump_quantity_cost
+
+                                # Set them to a general variable to be used.
+                                comp_individual_cost = round(self.pump_cost, 2)
+                                comp_total_cost = round(self.total_pump_cost, 2)
+
+                                self.treeview.set(item, '#6', comp_individual_cost)
+                                self.treeview.set(item, '#7', comp_total_cost)
+
+                            elif row_type == 'Expander':
+                                self.expander_cost = (544 * row_metric ** 0.8331)
+                                self.expander_quantity_cost = self.expander_cost * row_quantity
+                                self.total_expander_cost += self.expander_quantity_cost
+
+                                # Set them to a general variable to be used.
+                                comp_individual_cost = round(self.expander_cost, 2)
+                                comp_total_cost = round(self.total_expander_cost, 2)
+
+                                self.treeview.set(item, '#6', comp_individual_cost)
+                                self.treeview.set(item, '#7', comp_total_cost)
+
+                            elif row_type == 'Storage Tank':
+                                self.st_cost = (52.6 * row_metric ** 0.5531)
+                                self.st_quantity_cost = self.st_cost * row_quantity
+                                self.total_st_cost += self.st_quantity_cost
+
+                                # Set them to a general variable to be used.
+                                comp_individual_cost = round(self.st_cost, 2)
+                                comp_total_cost = round(self.total_st_cost, 2)
+
+                                self.treeview.set(item, '#6', comp_individual_cost)
+                                self.treeview.set(item, '#7', comp_total_cost)
+
+                            # Change the values in the database on the correct row.
+                            c.execute('UPDATE ComponentData SET name=?, metric=?, quantity=?, individual_cost=?, total_cost=? WHERE id=?', (row_name, row_metric, row_quantity, comp_individual_cost, comp_total_cost, row_id,))
+                            db.commit()
+
+                            total_system_cost = 0
+                            total_quantity = 0
+
+                            comp_values_quantity_fetch = c.execute('SELECT quantity FROM ComponentData').fetchall()
+                            comp_values_quantity = [x[0] for x in comp_values_quantity_fetch]
+                            for quantity in comp_values_quantity:
+                                total_quantity += quantity
+
+                            comp_values_individual_costs_fetch = c.execute('SELECT total_cost FROM ComponentData').fetchall()
+                            comp_values_individual_costs = [x[0] for x in comp_values_individual_costs_fetch]
+                            for individual_cost in comp_values_individual_costs:
+                                total_system_cost += individual_cost
+
+                            self.results_label["text"] = 'Total System Cost: £%.2f' % round(total_system_cost, 2)
+                            self.results_quantity_total_label["text"] = 'Across %d Components' % total_quantity
+                            ms.showinfo('Updated', 'Cost has been updated to £{total_system_cost}\nAcross {total_quantity} Components'.format(total_system_cost=round(total_system_cost, 2), total_quantity=total_quantity))
+                    except ValueError:
+                        ms.showerror('Invalid', 'Invalid Quantity Input.')
+
+                else:
+                    self.treeview.set(item, column, entry.get())
+                    entry.destroy()
+
+                    row_id = self.treeview.item(item)['values'][0]
+                    row_name = self.treeview.item(item)['values'][2]
+                    row_metric = self.treeview.item(item)['values'][3]
+                    row_quantity = self.treeview.item(item)['values'][4]
+
+                    # Need to update the costs according to the changes too.
+                    row_individual_cost = self.treeview.item(item)['values'][5]
+                    row_total_cost = self.treeview.item(item)['values'][6]
+
+                    # Change the values in the database on the correct row.
+                    c.execute('UPDATE ComponentData SET name=?, metric=?, quantity=?, individual_cost=?, total_cost=? WHERE id=?', (row_name, row_metric, row_quantity, row_individual_cost, row_total_cost, row_id,))
+                    db.commit()
+
+            column = self.treeview.identify_column(event.x)
+            column_str = str(column)
+            if column_str != '#3' and column_str != '#4' and column_str != '#5':
+                return
+            else:
+                item = self.treeview.identify_row(event.y)
+                x, y, width, height = self.treeview.bbox(item, column)
+                value = self.treeview.set(item, column)
+        else:
+            return
+
+        # display the Entry field
+        entry = ttk.Entry(self.treeview)
+        entry.place(x=x, y=y, width=width, height=height,
+                    anchor="nw")
+        entry.insert(0, value)
+        entry.bind('<FocusOut>', lambda e: entry.destroy())
+        entry.bind('<Return>', ok)
+        entry.focus_set()
+
+    def delete_selected(self):
+        # Deletes the item from the treeview.
+        count = -1
+        for i in self.treeview.selection()[::-1]:
+            # Select the id seen on the treeview table
+            count += 1
+            tv_id = list(self.treeview.item(self.treeview.selection()[::-1][count]).values())[2][0]
+            self.treeview.delete(i)
+            count -= 1
+
+            # Delete the row from the database as well.
+            c.execute('DELETE FROM ComponentData WHERE id=?', (tv_id,))
+            db.commit()
 
     def clear_database(self):
         confirm_clear = ms.askokcancel('WARNING', 'Clearing the database is permanent.\nAny components that were stored will be deleted forever.\nDo you wish to continue?')
@@ -1256,9 +1780,13 @@ class Results():
             c.execute('DELETE FROM ComponentData')
             db.commit()
 
+            ms.showinfo('Success', 'Database has been cleared.')
+
             # Clear the results treeview table.
             for i in self.treeview.get_children():
                 self.treeview.delete(i)
+        else:
+            ms.showinfo('Aborted', 'Action Aborted')
 
     def total_cost_calculate(self):
         # Get all the total_cost values from the table.
@@ -1276,9 +1804,9 @@ class Results():
         for individual_cost in comp_values_individual_costs:
             total_system_cost += individual_cost
 
-        self.results_label["text"] = 'Total System Cost: £%.2f' % total_system_cost
+        self.results_label["text"] = 'Total System Cost: £%.2f' % round(total_system_cost, 2)
         self.results_quantity_total_label["text"] = 'Across %d Components' % total_quantity
-        ms.showinfo('Updated', 'Cost has been updated to £{total_system_cost}\nAcross {total_quantity} Components'.format(total_system_cost=total_system_cost, total_quantity=total_quantity))
+        ms.showinfo('Updated', 'Cost has been updated to £{total_system_cost}\nAcross {total_quantity} Components'.format(total_system_cost=round(total_system_cost, 2), total_quantity=total_quantity))
 
     # Treeview sorting algorithm
     def treeview_sort_column(self, tv, col, reverse):
@@ -1301,6 +1829,18 @@ class About():
         self.master = master
         about_page = tk.Frame(main_notebook, bg=bg)
         main_notebook.add(about_page, text='About')
+
+        # About page
+        about_frame = tk.Frame(about_page, bg='gray20')
+        about_frame.pack(expand=True)
+
+        title_label_1 = tk.Label(about_frame, bg='gray20')
+        title_label_1.config(bd=0, text='Software Developed by Marco Fernandes', font='System 30', fg='yellow')
+        title_label_1.pack(expand=True, fill=tk.X, anchor=tk.N)
+
+        title_label_2 = tk.Label(about_frame, bg='gray20')
+        title_label_2.config(bd=0, text='Component Cost Equations Developed by Robert Platica', font='System 30', fg='yellow')
+        title_label_2.pack(expand=True, fill=tk.X, anchor=tk.N)
 
 
 class MainApp():
