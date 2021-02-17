@@ -399,8 +399,8 @@ class Turbines():
                 for i in range(len(comp_values)):
                     try:
                         r.treeview.insert('', tk.END,
-                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
-                                                     comp_values_fetch[i][5], comp_values_fetch[i][6]))
+                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4], comp_values_fetch[i][5],
+                                                     comp_values_fetch[i][6], comp_values_fetch[i][7]))
                     except IndexError:
                         # Insert an empty string if this error is caught
                         r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', '', ''))
@@ -771,8 +771,8 @@ class HeatExchangers():
                 for i in range(len(comp_values)):
                     try:
                         r.treeview.insert('', tk.END,
-                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
-                                                     comp_values_fetch[i][5], comp_values_fetch[i][6]))
+                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4], comp_values_fetch[i][5],
+                                                     comp_values_fetch[i][6], comp_values_fetch[i][7]))
                     except IndexError:
                         # Insert an empty string if this error is caught
                         r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', '', ''))
@@ -960,8 +960,8 @@ class Pumps():
                 for i in range(len(comp_values)):
                     try:
                         r.treeview.insert('', tk.END,
-                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
-                                                     comp_values_fetch[i][5], comp_values_fetch[i][6]))
+                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4], comp_values_fetch[i][5],
+                                                     comp_values_fetch[i][6], comp_values_fetch[i][7]))
                     except IndexError:
                         # Insert an empty string if this error is caught
                         r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', '', ''))
@@ -1149,8 +1149,8 @@ class Expanders():
                 for i in range(len(comp_values)):
                     try:
                         r.treeview.insert('', tk.END,
-                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
-                                                     comp_values_fetch[i][5], comp_values_fetch[i][6]))
+                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4], comp_values_fetch[i][5],
+                                                     comp_values_fetch[i][6], comp_values_fetch[i][7]))
                     except IndexError:
                         # Insert an empty string if this error is caught
                         r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', '', ''))
@@ -1337,8 +1337,8 @@ class StorageTanks():
                 for i in range(len(comp_values)):
                     try:
                         r.treeview.insert('', tk.END,
-                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][1], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4],
-                                                     comp_values_fetch[i][5], comp_values_fetch[i][6]))
+                                             values=(comp_values_fetch[i][0], comp_values_fetch[i][2], comp_values_fetch[i][3], comp_values_fetch[i][4], comp_values_fetch[i][5],
+                                                     comp_values_fetch[i][6], comp_values_fetch[i][7]))
                     except IndexError:
                         # Insert an empty string if this error is caught
                         r.treeview.insert('', tk.END, values=('', '', '', '', '', '', '', '', '', ''))
