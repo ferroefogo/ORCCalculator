@@ -15,7 +15,7 @@ from anvil.tables import app_tables
 from anvil.pdf import PdfRenderer
 
 # PDF Creation Connect
-anvil.server.connect("56MWNLYPKSQFJRQPQ354X4FR-BLH3UYIWD3XTOSEJ")
+anvil.server.connect("TOKEN HERE")
 
 # Connect to database
 with sqlite3.connect('ComponentData.db') as db:
